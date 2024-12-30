@@ -1,0 +1,236 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700&display=swap');
+
+/* General container */
+.register-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+    padding: 20px;
+}
+
+/* Form container */
+.register-form {
+    width: 100%;
+    max-width: 400px;
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 30px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    animation: fadeIn 0.5s ease;
+}
+
+/* Form title */
+.register-title {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 24px;
+    font-weight: 700;
+    color: #333333;
+    margin-bottom: 20px;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* Inputs */
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-label {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    color: #555555;
+    margin-bottom: 8px;
+    display: block;
+}
+
+.form-control {
+  width: 100%;
+  padding: 12px;
+  font-size: 14px;
+  font-family: 'Montserrat', sans-serif;
+  color: #333333;
+  background: none;
+  border: none;
+  border-bottom: 2px solid #e0e0e0;
+  border-end-start-radius: 8px;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.form-control:focus {
+  border-bottom-color: #6366f1;
+  outline: none;
+}
+.form-control:focus {
+  border-bottom-color: #6366f1;
+  outline: none;
+}
+
+/* Register button */
+.btn-register {
+    width: 100%;
+    padding: 12px;
+    background: linear-gradient(135deg, #6366f1, #4f46e5);
+    color: #ffffff;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 600;
+    font-size: 16px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.btn-register:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(99, 102, 241, 0.3);
+}
+
+/* Checkbox and terms */
+/* From Uiverse.io by bociKond */ 
+/* Hide the default checkbox */
+/* Hide the default checkbox */
+.container input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
+  }
+  
+  .container {
+    display: block;
+    position: relative;
+    cursor: pointer;
+    font-size: 1rem; /* Ajuste del tamaño general */
+    user-select: none;
+  }
+  
+  /* Custom checkbox */
+  .checkmark {
+    --clr: #0B6E4F;
+    position: relative;
+    top: 0;
+    left: 0;
+    height: 1em; /* Reducir altura */
+    width: 1em; /* Reducir anchura */
+    background-color: #ccc;
+    border-radius: 50%;
+    transition: 300ms;
+  }
+  
+  /* Checked state */
+  .container input:checked ~ .checkmark {
+    background-color: var(--clr);
+    border-radius: 0.4rem; /* Ajustar radio */
+    animation: pulse 500ms ease-in-out;
+  }
+  
+  /* Checkmark indicator */
+  .checkmark:after {
+    content: "";
+    position: absolute;
+    display: none;
+  }
+  
+  /* Show the checkmark when checked */
+  .container input:checked ~ .checkmark:after {
+    display: block;
+  }
+  
+  /* Style the checkmark/indicator */
+  .container .checkmark:after {
+    left: 0.35em; /* Ajustar posición horizontal */
+    top: 0.2em; /* Ajustar posición vertical */
+    width: 0.2em; /* Reducir anchura */
+    height: 0.4em; /* Reducir altura */
+    border: solid #E0E0E2;
+    border-width: 0 0.12em 0.12em 0;
+    transform: rotate(45deg);
+  }
+  
+  /* Adjust the pulse animation */
+  @keyframes pulse {
+    0% {
+      box-shadow: 0 0 0 #0B6E4F90;
+      rotate: 20deg;
+    }
+  
+    50% {
+      rotate: -20deg;
+    }
+  
+    75% {
+      box-shadow: 0 0 0 6px #0B6E4F60; /* Reducir tamaño del pulso */
+    }
+  
+    100% {
+      box-shadow: 0 0 0 8px #0B6E4F30; /* Reducir tamaño del pulso */
+      rotate: 0;
+    }
+  }
+  
+
+.form-check-input {
+    width: 16px;
+    height: 16px;
+    border: 1px solid #c3cfe2;
+    border-radius: 4px;
+    appearance: none;
+    background: #ffffff;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.form-check-input:checked {
+    background: #0B6E4F;
+    border-color: #0B6E4F;
+}
+
+.form-check-label {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 14px;
+    color: #555555;
+}
+
+/* Modal styles */
+.modal-content {
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    animation: fadeIn 0.5s ease;
+}
+
+.modal-header {
+    border-bottom: none;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 600;
+    color: #333333;
+}
+
+.modal-title {
+    font-size: 18px;
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: flex-start;
+    background-color: #f9fafb;
+    border-top: none;
+    padding: 20px;
+}
+
+/* Fade-in animation */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
