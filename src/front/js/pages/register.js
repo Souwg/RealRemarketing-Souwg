@@ -1,7 +1,8 @@
-import React, { useActionState, useContext, useState } from "react";
-import { Navigate, useNavigate } from "react-router-dom";
+import React, { useContext, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Context } from "../store/appContext";
 import "../../styles/register.css";
+import Swal from "sweetalert2";
 
 export const Register = () => {
   //register
@@ -45,20 +46,29 @@ export const Register = () => {
         userData.password
       );
       if (!response.error) {
+        Swal.fire({
+          title: "You are now registered",
+          icon: "success",
+          draggable: true,
+        });
         navigate("/login");
       } else {
         setError(response.msg);
       }
     } else {
-      setError("Debes aceptar los Términos y Condiciones.");
+      const errorMessageTerms = "You must accept the terms and conditions."
+      setError(errorMessageTerms);
+      Swal.fire(errorMessageTerms);
     }
   };
 
   return (
     <>
       <div className="register-container">
-        <form className="register-form">
+        <form className="register-form" onSubmit={handleSubmit}>
           <h2 className="register-title">Register</h2>
+          {error && <p className="error-message">{error}</p>}
+
 
           {/* Name */}
           <div className="form-group">
@@ -70,6 +80,10 @@ export const Register = () => {
               id="name"
               name="name"
               className="form-control"
+              value={userData.name}
+              onChange={(e) =>
+                setUserData({ ...userData, name: e.target.value })
+              }
               placeholder="Enter your name"
             />
           </div>
@@ -85,6 +99,10 @@ export const Register = () => {
               name="last_name"
               className="form-control"
               placeholder="Enter your last name"
+              value={userData.last_name}
+              onChange={(e) =>
+                setUserData({ ...userData, last_name: e.target.value })
+              }
             />
           </div>
 
@@ -98,6 +116,10 @@ export const Register = () => {
               id="email"
               name="email"
               className="form-control"
+              value={userData.email}
+              onChange={(e) =>
+                setUserData({ ...userData, email: e.target.value })
+              }
               placeholder="Enter your email"
             />
           </div>
@@ -112,6 +134,10 @@ export const Register = () => {
               id="password"
               name="password"
               className="form-control"
+              value={userData.password}
+              onChange={(e) =>
+                setUserData({ ...userData, password: e.target.value })
+              }
               placeholder="Create a password"
             />
           </div>
@@ -187,8 +213,12 @@ export const Register = () => {
                         onChange={handleCheckboxChange}
                         className="form-check-input me-2"
                       />
-                      <label className="form-check-label" style={{ marginTop: "0.2em", }} htmlFor="termsCheck">                      
-                          Accepted Terms and Conditions
+                      <label
+                        className="form-check-label"
+                        style={{ marginTop: "0.2em" }}
+                        htmlFor="termsCheck"
+                      >
+                        Accepted Terms and Conditions
                       </label>
                     </div>
                   </div>
