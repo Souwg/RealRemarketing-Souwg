@@ -32,6 +32,7 @@ export const Register = () => {
       setShowModal(false);
     } else {
       setError("You must accept the terms and conditions.");
+      Swal.fire(error);
     }
   };
 
@@ -54,11 +55,10 @@ export const Register = () => {
         navigate("/login");
       } else {
         setError(response.msg);
+        Swal.fire(error);
       }
     } else {
-      const errorMessageTerms = "You must accept the terms and conditions."
-      setError(errorMessageTerms);
-      Swal.fire(errorMessageTerms);
+      Swal.fire("You must accept the terms and conditions.");
     }
   };
 
@@ -67,7 +67,7 @@ export const Register = () => {
       <div className="register-container">
         <form className="register-form" onSubmit={handleSubmit}>
           <h2 className="register-title">Register</h2>
-          {error && <p className="error-message">{error}</p>}
+          
 
 
           {/* Name */}

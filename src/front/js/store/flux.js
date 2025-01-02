@@ -23,19 +23,19 @@ const getState = ({ getStore, getActions, setStore }) => {
 					if (response.ok) {
 						const data = await response.json();
 						console.log("Usuario registrado:", data.user);
-						return data; // Devuelve los datos si el registro fue exitoso
+						return data;
 					} else {
 						const errorData = await response.json();
 						console.error("Error en el registro:", errorData.msg);
-						return { error: true, msg: errorData.msg }; // Devuelve un mensaje de error si falló
+						return { error: true, msg: errorData.msg }; 
 					}
 				} catch (error) {
 					console.error("Error en el registro:", error);
-					return { error: true, msg: "Error en la solicitud" }; // Indica un error de red u otro tipo de error
+					return { error: true, msg: "Error en la solicitud" };
 				}
 			},
 
-
+			
 		
 		}
 	};
