@@ -6,4 +6,4 @@ export const User = () => {
         <h3>Perfil user</h3>
         </>
     )
-}
+};
