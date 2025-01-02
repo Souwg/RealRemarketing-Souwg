@@ -5,30 +5,10 @@ import { Link } from "react-router-dom";
 import "../../styles/login.css";
 
 export const Login = () => {
-  const { actions, store } = useContext(Context);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-  const navigate = useNavigate;
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const response = await actions.loginUser(email, password);
-    if (response.token) {
-      localStorage.setItem("token", response.token);
-    }
-    if (response.success) {
-      navigate(response.is_admin ? "/admin " : "/user");
-    } else {
-      setError(response.msg);
-      setEmail("");
-      setIsModalOpen(true);
-    }
-  };
-
+  
   return (
     <div className="login-container">
-      <form className="login-form">
+      <form className="login-form" >
         <h2 className="login-title">Login</h2>
 
         {/* Email */}
@@ -41,7 +21,9 @@ export const Login = () => {
             id="email"
             name="email"
             className="form-control"
+            
             placeholder="Enter your email"
+            required
           />
         </div>
 
@@ -54,8 +36,9 @@ export const Login = () => {
             type="password"
             id="password"
             name="password"
-            className="form-control"
+            className="form-control" 
             placeholder="Enter your password"
+            required
           />
         </div>
 
@@ -74,7 +57,6 @@ export const Login = () => {
         <button type="submit" className="btn-login">
           Login
         </button>
-
         {/* Register Section */}
         <div className="form-group register-section">
           <p className="register-text">
