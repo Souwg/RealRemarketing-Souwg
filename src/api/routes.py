@@ -2,10 +2,14 @@
 This module takes care of starting the API Server, Loading the DB and Adding the endpoints
 """
 from flask import Flask, request, jsonify, url_for, Blueprint
+import requests
 from api.models import db, User
 from flask_bcrypt import Bcrypt
 from api.utils import generate_sitemap, APIException
 from flask_cors import CORS
+
+import pandas as pd 
+
 
 app = Flask(__name__)
 bcrypt = Bcrypt(app)
@@ -61,3 +65,12 @@ def login_user():
         return jsonify({"msg":"Incorrect password."}), 401
     token = create_access_token(identity=str(user.id), additional_claims={"is admin": user.is_admin})
     return jsonify({"msg":"login successful", "token": token, "id": user.id, "user": user.serialize(), "is_admin": user.is_admin})
+
+
+@api.route('/excel', methods=['GET'])
+def excel_data():
+
+    read_file = pd.read_csv('public/documento.csv')
+
+
+    return jsonify(read_file.to_dict(orient='records'))
