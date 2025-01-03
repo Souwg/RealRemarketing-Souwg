@@ -33,8 +33,8 @@ export const Navbar = () => {
               </Link>
             </li>
             <li className="nav-item">
-              <Link className="nav-link fw-semibold text-dark" to="/about">
-                About
+              <Link className="nav-link fw-semibold text-dark" to="/excel">
+                Excel
               </Link>
             </li>
             <li className="nav-item dropdown">
