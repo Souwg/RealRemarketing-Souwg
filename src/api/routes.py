@@ -2,13 +2,18 @@
 This module takes care of starting the API Server, Loading the DB and Adding the endpoints
 """
 from flask import Flask, request, jsonify, url_for, Blueprint
-import requests
-from api.models import db, User
+from flask_jwt_extended import create_access_token, jwt_required, get_jwt, get_jwt_identity, current_user
 from flask_bcrypt import Bcrypt
 from api.utils import generate_sitemap, APIException
+from .models import User
 from flask_cors import CORS
-
+import jwt
+import datetime
+from flask import jsonify, request
+from werkzeug.security import check_password_hash
+import requests
 import pandas as pd 
+
 
 
 app = Flask(__name__)
@@ -51,20 +56,32 @@ def signup_user():
     db.session.commit()
     return jsonify({"msg": "User created successfully", "user":user.serialize()})
 
-#Login endpoint
+# Login endpoint
 @api.route('/login', methods=['POST'])
 def login_user():
     body = request.get_json()
-    if body["email"] is None:
-        return jsonify({"msg":"The email address is missing in the form."}), 400
-    user = User.query.filter_by(email=body["email"]).first()
-    if user is None:
-        return jsonify({"msg":"user not found"}), 401
-    valid_password = bcrypt.check_password_hash(user.password, body["password"])
-    if not valid_password:
-        return jsonify({"msg":"Incorrect password."}), 401
-    token = create_access_token(identity=str(user.id), additional_claims={"is admin": user.is_admin})
-    return jsonify({"msg":"login successful", "token": token, "id": user.id, "user": user.serialize(), "is_admin": user.is_admin})
+    if not body or not body.get('email') or not body.get('password'):
+        return jsonify({"msg": "Email and password are required"}), 400
+
+    user = User.query.filter_by(email=body['email']).first()
+    if not user:
+        return jsonify({"msg": "User not found"}), 404
+
+    if not check_password_hash(user.password, body['password']):
+        return jsonify({"msg": "Invalid password"}), 401
+
+    # Generate JWT
+    payload = {
+        'user_id': user.id,
+        'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=24)  # Token valid for 24 hours
+    }
+    token = jwt.encode(payload, 'masd56dd5sdgs158ds65dsg456s2gsg156g4ds8g9ds1s3d202ds0dsg54dsgds', algorithm='HS256')
+
+    return jsonify({
+        "msg": "Login successful",
+        "token": token,
+        "user": user.serialize()
+    }), 200
 
 
 @api.route('/excel', methods=['GET'])

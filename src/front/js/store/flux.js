@@ -1,8 +1,10 @@
 import Swal from "sweetalert2";
+
 const getState = ({ getStore, getActions, setStore }) => {
 	return {
 		store: {
-			
+			token: localStorage.getItem("token") || null,
+            user: null,
 		},
 		actions: {
 			signupUser: async (name, last_name, email, password) => {
@@ -35,8 +37,29 @@ const getState = ({ getStore, getActions, setStore }) => {
 				}
 			},
 
-			
-		
+			login: async (email, password) => {
+                try {
+                    const response = await fetch("http://localhost:5000/api/login", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ email, password }),
+                    });
+
+                    if (!response.ok) throw new Error("Invalid login credentials");
+
+                    const data = await response.json();
+                    localStorage.setItem("token", data.token);
+                    setStore({ token: data.token, user: data.user });
+                    return true;
+                } catch (error) {
+                    console.error("Login error:", error);
+                    return false;
+                }
+            },
+            logout: () => {
+                localStorage.removeItem("token");
+                setStore({ token: null, user: null });
+            },
 		}
 	};
 };
