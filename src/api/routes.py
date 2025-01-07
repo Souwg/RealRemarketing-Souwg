@@ -4,11 +4,13 @@ This module takes care of starting the API Server, Loading the DB and Adding the
 from flask import Flask, request, jsonify, url_for, Blueprint
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt, get_jwt_identity, current_user
 from flask_bcrypt import Bcrypt
-from api.utils import generate_sitemap, APIException
+from src.api.utils import APIException, generate_sitemap
 from .models import User
 from flask_cors import CORS
 import jwt
+import os
 import datetime
+from src.app import db
 from flask import jsonify, request
 from werkzeug.security import check_password_hash
 import requests
@@ -20,8 +22,9 @@ app = Flask(__name__)
 bcrypt = Bcrypt(app)
 api = Blueprint('api', __name__)
 
-# Allow CORS requests to this API
+
 CORS(api)
+
 
 
 @api.route('/hello', methods=['POST', 'GET'])
@@ -60,6 +63,8 @@ def signup_user():
 @api.route('/login', methods=['POST'])
 def login_user():
     body = request.get_json()
+    print("Email recibido:", body.get('email'))
+    print("Password recibido:", body.get('password'))
     if not body or not body.get('email') or not body.get('password'):
         return jsonify({"msg": "Email and password are required"}), 400
 
@@ -82,6 +87,51 @@ def login_user():
         "token": token,
         "user": user.serialize()
     }), 200
+
+#upload endpoint
+@api.route('/upload', methods=['POST'])
+def upload_file():
+    if 'file' not in request.files:
+        return jsonify({"error": "No se envió ningún archivo"}), 400
+
+    file = request.files['file']
+
+    if file.filename == '':
+        return jsonify({"error": "El archivo no tiene un nombre válido"}), 400
+
+    if not file.filename.endswith('.csv'):
+        return jsonify({"error": "Solo se permiten archivos CSV"}), 400
+
+    try:
+        upload_folder = 'uploads'
+        os.makedirs(upload_folder, exist_ok=True)
+        filepath = os.path.join(upload_folder, file.filename)
+        file.save(filepath)
+
+        print(f"Archivo recibido: {file.filename}, tipo: {file.content_type}")  
+
+        try:
+            df = pd.read_csv(filepath)
+            df = df.fillna("")  
+        except pd.errors.EmptyDataError:
+            os.remove(filepath)
+            return jsonify({"error": "El archivo está vacío o no contiene datos válidos"}), 400
+        except pd.errors.ParserError:
+            os.remove(filepath)
+            return jsonify({"error": "El archivo tiene un formato incorrecto"}), 400
+
+        json_data = df.to_dict(orient='records')
+        os.remove(filepath)  
+
+        print("Datos procesados correctamente")  
+        return jsonify(json_data), 200
+
+    except Exception as e:
+        error_message = f"Error al procesar el archivo: {str(e)}"
+        print(error_message) 
+        return jsonify({"error": error_message}), 500
+
+
 
 
 @api.route('/excel', methods=['GET'])

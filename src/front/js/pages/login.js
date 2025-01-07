@@ -11,9 +11,9 @@ export const Login = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        const success = await actions.login(email, password);
+        const success = await actions.loginUser(email, password);
         if (success) {
-            navigate("/user"); // Redirigir al usuario después del login
+            navigate(response.is_admin ? "/admin" : "/user");
         } else {
             setError("Invalid email or password");
         }

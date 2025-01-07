@@ -4,7 +4,7 @@ import "../../styles/navbar.css";
 
 export const Navbar = () => {
   return (
-    <nav className="navbar navbar-expand-lg navbar-light bg-light shadow-sm">
+    <nav className="navbar navbar-expand-lg navbar-light shadow-sm" style={{ background: "#eee", }}>
       <div className="container">
         {/* Brand logo */}
         <Link className="navbar-brand title fw-bold" to="/">

@@ -8,7 +8,7 @@ import { Demo } from "./pages/demo";
 import { Register } from "./pages/register";
 import { Login } from "./pages/login";
 import { User } from "./pages/user"
-import { Admin } from "./pages/admin"
+import { FileUpload } from "./pages/admin"
 import { MapComponent } from "./pages/excel"
 import injectContext from "./store/appContext";
 
@@ -33,7 +33,7 @@ const Layout = () => {
                         <Route element={<Login/>} path="/login"/>
                         <Route element={<Register/>} path="/register"/>
                         <Route element={<User/>} path="/user"/>
-                        <Route element={<Admin/>} path="/admin"/>
+                        <Route element={<FileUpload/>} path="/admin"/>
                         <Route element={<MapComponent/>} path="/excel"/>
                         <Route element={<h1>Not found!</h1>} />
                     </Routes>
