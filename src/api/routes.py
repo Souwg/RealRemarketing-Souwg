@@ -6,6 +6,7 @@ from flask_jwt_extended import create_access_token, jwt_required, get_jwt, get_j
 from flask_bcrypt import Bcrypt
 from src.api.utils import APIException, generate_sitemap
 from .models import User
+from .models import Files, db
 from flask_cors import CORS
 import jwt
 import os
@@ -13,6 +14,7 @@ import datetime
 from src.app import db
 from flask import jsonify, request
 from werkzeug.security import check_password_hash
+from werkzeug.utils import secure_filename
 import requests
 import pandas as pd 
 
@@ -99,45 +101,72 @@ def upload_file():
     if file.filename == '':
         return jsonify({"error": "El archivo no tiene un nombre válido"}), 400
 
-    if not file.filename.endswith('.csv'):
-        return jsonify({"error": "Solo se permiten archivos CSV"}), 400
-
     try:
-        upload_folder = 'uploads'
-        os.makedirs(upload_folder, exist_ok=True)
-        filepath = os.path.join(upload_folder, file.filename)
-        file.save(filepath)
+        # Asegurar un nombre de archivo seguro
+        filename = secure_filename(file.filename)
 
-        print(f"Archivo recibido: {file.filename}, tipo: {file.content_type}")  
+        # Verificar si ya existe un archivo con el mismo nombre
+        existing_file = Files.query.filter_by(Filename=filename).first()
+        if existing_file:
+            return jsonify({"error": f"El archivo '{filename}' ya existe en la base de datos"}), 400
 
-        try:
-            df = pd.read_csv(filepath)
-            df = df.fillna("")  
-        except pd.errors.EmptyDataError:
-            os.remove(filepath)
-            return jsonify({"error": "El archivo está vacío o no contiene datos válidos"}), 400
-        except pd.errors.ParserError:
-            os.remove(filepath)
-            return jsonify({"error": "El archivo tiene un formato incorrecto"}), 400
+        # Leer el archivo como DataFrame
+        df = pd.read_csv(file)
 
-        json_data = df.to_dict(orient='records')
-        os.remove(filepath)  
+        # Validar que el DataFrame no esté vacío
+        if df.empty:
+            return jsonify({"error": "El archivo está vacío"}), 400
 
-        print("Datos procesados correctamente")  
-        return jsonify(json_data), 200
+        # Iterar sobre las filas y guardarlas en la base de datos
+        for _, row in df.iterrows():
+            file_row = Files(
+                Filename=filename,
+                Acres=row.get('Acres'),
+                County=row.get('County'),
+                Owner=row.get('Owner'),
+                Parcel=row.get('Parcel'),
+                Range=row.get('Range'),
+                Section=row.get('Section'),
+                StartingBid=row.get('StartingBid'),
+                State=row.get('State'),
+                Township=row.get('Township'),
+            )
+            db.session.add(file_row)
+
+        db.session.commit()  # Confirmar cambios en la base de datos
+
+        return jsonify({"message": f"Archivo '{filename}' procesado y guardado en la base de datos"}), 200
 
     except Exception as e:
-        error_message = f"Error al procesar el archivo: {str(e)}"
-        print(error_message) 
-        return jsonify({"error": error_message}), 500
+        db.session.rollback()
+        print(f"Error al procesar el archivo: {e}")
+        return jsonify({"error": f"Error al procesar el archivo: {str(e)}"}), 500
+
+
+    except Exception as e:
+        db.session.rollback()  # Revertir en caso de error
+        print(f"Error al procesar el archivo: {e}") 
+        return jsonify({"error": f"Error al procesar el archivo: {str(e)}"}), 500
+
+@api.route('/delete-all-files', methods=['DELETE'])
+def delete_all_files():
+    try:
+        db.session.query(Files).delete()
+        db.session.commit()
+        return jsonify({"message": "Todos los registros han sido eliminados"}), 200
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error al eliminar los registros: {e}")
+        return jsonify({"error": f"Error al eliminar los registros: {str(e)}"}), 500
+    
 
 
 
 
-@api.route('/excel', methods=['GET'])
-def excel_data():
+#@api.route('/excel', methods=['GET'])
+#def excel_data():
 
-    read_file = pd.read_csv('public/documento.csv')
+#    read_file = pd.read_csv('public/documento.csv')
 
 
-    return jsonify(read_file.to_dict(orient='records'))
+#    return jsonify(read_file.to_dict(orient='records'))
