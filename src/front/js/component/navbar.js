@@ -34,7 +34,7 @@ export const Navbar = () => {
             </li>
             <li className="nav-item">
               <Link className="nav-link fw-semibold text-dark" to="/excel">
-                Excel
+                Demo
               </Link>
             </li>
             <li className="nav-item dropdown">
@@ -43,7 +43,6 @@ export const Navbar = () => {
                 href="#"
                 id="navbarDropdown"
                 role="button"
-                data-bs-toggle="dropdown"
                 aria-expanded="false"
               >
                 <i className="bi bi-three-dots-vertical me-2"></i>Menu

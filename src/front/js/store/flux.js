@@ -73,7 +73,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 				  });
 		
 				  if (!response.ok) {
-					throw new Error("Error al procesar el archivo");
+					throw new Error("");
 				  }
 		
 				  const data = await response.json();
@@ -84,9 +84,30 @@ const getState = ({ getStore, getActions, setStore }) => {
 		
 				} catch (error) {
 				  console.error(error);
-				  alert("Hubo un error al procesar el archivo.");
+				  console.log("Hubo un error al procesar el archivo.");
+				  throw error;
 				}
 			  },
+			  deleteAllFiles: async () => {
+				try {
+					const response = await fetch("https://studious-palm-tree-7v4xxv5wq5x2pj99-3001.app.github.dev/api/delete-all-files", {
+						method: "DELETE",
+					});
+			
+					if (!response.ok) {
+						const errorData = await response.json();
+						throw new Error(errorData.error || "Error desconocido");
+					}
+			
+					const data = await response.json();
+				
+					console.log("Todos los registros han sido eliminados correctamente.");
+				} catch (error) {
+					console.error("Error al eliminar los registros:", error.message);
+					alert("Hubo un error al intentar eliminar los registros: " + error.message);
+				}
+			},
+			
 		}
 	};
 };
