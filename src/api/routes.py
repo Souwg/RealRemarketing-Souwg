@@ -124,16 +124,16 @@ def upload_file():
                 Acres=row.get('Acres'),
                 County=row.get('County'),
                 Owner=row.get('Owner'),
-                Parcel=row.get('Parcel'),
+                Parcel=row.get('Parcel #'),
                 Range=row.get('Range'),
                 Section=row.get('Section'),
-                StartingBid=row.get('StartingBid'),
+                StartingBid=row.get('Starting Bid'),
                 State=row.get('State'),
                 Township=row.get('Township'),
             )
             db.session.add(file_row)
 
-        db.session.commit()  # Confirmar cambios en la base de datos
+        db.session.commit()
 
         return jsonify({"message": f"Archivo '{filename}' procesado y guardado en la base de datos"}), 200
 
@@ -147,7 +147,9 @@ def upload_file():
         db.session.rollback()  # Revertir en caso de error
         print(f"Error al procesar el archivo: {e}") 
         return jsonify({"error": f"Error al procesar el archivo: {str(e)}"}), 500
+    
 
+#Delete all Files
 @api.route('/delete-all-files', methods=['DELETE'])
 def delete_all_files():
     try:
@@ -159,6 +161,17 @@ def delete_all_files():
         print(f"Error al eliminar los registros: {e}")
         return jsonify({"error": f"Error al eliminar los registros: {str(e)}"}), 500
     
+@api.route('/files', methods=['GET'])
+def get_all_files():
+    try:
+        #get all register
+        files = Files.query.all()
+
+        #serialize all data
+        return jsonify([file.serialize() for file in files]), 200
+    except Exception as e:
+        print(f"Error al obtener los archivos: {e}")
+        return jsonify({"error": f"Error al obtener los archivos: {str(e)}"}), 500
 
 
 

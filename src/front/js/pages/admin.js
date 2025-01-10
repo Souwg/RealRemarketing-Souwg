@@ -1,4 +1,4 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import { Context } from "../store/appContext";
 import Swal from "sweetalert2";
 import "../../styles/admin.css";
@@ -102,5 +102,57 @@ export const FileUpload = () => {
         </div>
       </form>
     </div>
+  );
+};
+
+export const FileTable = () => {
+  const { actions } = useContext(Context);
+    const [files, setFiles] = useState([]);
+    useEffect(() => {
+      // Obtener la lista de archivos al cargar el componente
+      const fetchFiles = async () => {
+          const fileList = await actions.getAllFiles();
+          setFiles(fileList);
+      };
+      fetchFiles();
+    }, [actions]);
+  return (  
+    <div className="file-table-container">
+            <h2>Uploaded Files</h2>
+            {files.length > 0 ? (
+                <table className="file-table">
+                    <thead>
+                        <tr>
+                            <th>Acres</th>
+                            <th>County</th>
+                            <th>Owner</th>
+                            <th>Parcel</th>
+                            <th>Range</th>
+                            <th>Section</th>
+                            <th>StartingBid</th>
+                            <th>State</th>
+                            <th>Township</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {files.map((file) => (
+                            <tr key={file.id}>                             
+                                <td>{file.Acres}</td>
+                                <td>{file.County}</td>
+                                <td>{file.Owner}</td>
+                                <td>{file.Parcel}</td>
+                                <td>{file.Range}</td>
+                                <td>{file.Section}</td>
+                                <td>{file.StartingBid}</td>
+                                <td>{file.State}</td>
+                                <td>{file.Township}</td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            ) : (
+                <p>No files uploaded yet.</p>
+            )}
+        </div>
   );
 };

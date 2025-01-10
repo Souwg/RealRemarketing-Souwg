@@ -193,3 +193,58 @@
   justify-content: space-between;
   align-items: center;
 }
+
+.file-table-container {
+  margin-top: 20px;
+  padding: 10px;
+  background-color: #f9f9f9;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.file-table-container h2 {
+  font-size: 24px;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 15px;
+  text-align: center;
+}
+
+.file-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+.file-table th, .file-table td {
+  border: 1px solid #ddd;
+  padding: 10px;
+  text-align: left;
+}
+
+.file-table th {
+  background-color: #f4f4f4;
+  font-weight: bold;
+  color: #555;
+}
+
+.file-table tbody tr:nth-child(even) {
+  background-color: #f8f8f8;
+}
+
+.file-table tbody tr:hover {
+  background-color: #e6f7ff;
+}
+
+.file-table td {
+  color: #333;
+  font-size: 14px;
+}
+
+/* Estilos para manejar la tabla vacía */
+.file-table-container p {
+  color: #999;
+  text-align: center;
+  font-style: italic;
+}

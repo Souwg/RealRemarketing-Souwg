@@ -8,6 +8,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 			uploadedFile: null,
 		},
 		actions: {
+			//action Register user and admin
 			signupUser: async (name, last_name, email, password) => {
 				try {
 					const response = await fetch(`https://studious-palm-tree-7v4xxv5wq5x2pj99-3001.app.github.dev/api/signup`, {
@@ -37,7 +38,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 					return { error: true, msg: "Error en la solicitud" };
 				}
 			},
-
+			//action login user and admin 
 			loginUser: async (email, password) => {
                 try {
                     const response = await fetch("https://studious-palm-tree-7v4xxv5wq5x2pj99-3001.app.github.dev/api/login", {
@@ -62,6 +63,7 @@ const getState = ({ getStore, getActions, setStore }) => {
                 setStore({ token: null, user: null });
             },
 
+			//action upload files
 			uploadFile: async (file) => {
 				const formData = new FormData();
 				formData.append("file", file);
@@ -81,13 +83,14 @@ const getState = ({ getStore, getActions, setStore }) => {
 		
 				  // Almacenar el resultado en el store (opcional)
 				  setStore({ uploadedFile: data });
-		
 				} catch (error) {
 				  console.error(error);
 				  console.log("Hubo un error al procesar el archivo.");
 				  throw error;
 				}
 			  },
+
+			  //action delete all files
 			  deleteAllFiles: async () => {
 				try {
 					const response = await fetch("https://studious-palm-tree-7v4xxv5wq5x2pj99-3001.app.github.dev/api/delete-all-files", {
@@ -108,6 +111,24 @@ const getState = ({ getStore, getActions, setStore }) => {
 				}
 			},
 			
+			//action get files from data
+			getAllFiles: async () => {
+				try {
+					const response = await fetch("https://studious-palm-tree-7v4xxv5wq5x2pj99-3001.app.github.dev/api/files", {
+						method: "GET",
+					});
+			
+					if (!response.ok) {
+						const errorData = await response.json();
+						throw new Error(errorData.error || "Error desconocido");
+					}
+					const data = await response.json();
+					return data;
+				} catch (error) {
+					console.error("Error al obtener la lista de archivos:", error.nessage);
+					return [];
+				}
+			}
 		}
 	};
 };
