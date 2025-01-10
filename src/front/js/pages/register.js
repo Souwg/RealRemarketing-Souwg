@@ -54,13 +54,17 @@ export const Register = () => {
         });
         navigate("/login");
       } else {
-        setError(response.msg);
-        Swal.fire(error);
-      }
-    } else {
-      Swal.fire("You must accept the terms and conditions.");
+        Swal.fire({
+            title: "Registration Error",
+            text: response.msg, 
+            icon: "error",
+            draggable: true,
+        });
     }
-  };
+} else {
+    Swal.fire("You must accept the terms and conditions.");
+}
+};
 
   return (
     <>

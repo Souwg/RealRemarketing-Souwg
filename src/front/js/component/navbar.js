@@ -33,7 +33,7 @@ export const Navbar = () => {
               </Link>
             </li>
             <li className="nav-item">
-              <Link className="nav-link fw-semibold text-dark" to="/excel">
+              <Link className="nav-link fw-semibold text-dark" to="demo">
                 Demo
               </Link>
             </li>

@@ -7,41 +7,48 @@ import { Home } from "./pages/home";
 import { Demo } from "./pages/demo";
 import { Register } from "./pages/register";
 import { Login } from "./pages/login";
-import { User } from "./pages/user"
-import { FileUpload } from "./pages/admin"
-import { MapComponent } from "./pages/excel"
+import { User } from "./pages/user";
+import { FileUpload, FileTable } from "./pages/admin";
+
 import injectContext from "./store/appContext";
 
 import { Navbar } from "./component/navbar";
 import { Footer } from "./component/footer";
 
-
 const Layout = () => {
-    
-    const basename = process.env.BASENAME || "";
+  const basename = process.env.BASENAME || "";
 
-    if(!process.env.BACKEND_URL || process.env.BACKEND_URL == "") return <BackendURL/ >;
+  if (!process.env.BACKEND_URL || process.env.BACKEND_URL == "")
+    return <BackendURL />;
 
-    return (
-        <div>
-            <BrowserRouter basename={basename}>
-                <ScrollToTop>
-                    <Navbar />
-                    <Routes>
-                        <Route element={<Home />} path="/" />
-                        <Route element={<Demo />} path="/demo" />
-                        <Route element={<Login/>} path="/login"/>
-                        <Route element={<Register/>} path="/register"/>
-                        <Route element={<User/>} path="/user"/>
-                        <Route element={<FileUpload/>} path="/admin"/>
-                        <Route element={<MapComponent/>} path="/excel"/>
-                        <Route element={<h1>Not found!</h1>} />
-                    </Routes>
-                    <Footer />
-                </ScrollToTop>
-            </BrowserRouter>
-        </div>
-    );
+  return (
+    <div>
+      <BrowserRouter basename={basename}>
+        <ScrollToTop>
+          <Navbar />
+          <Routes>
+            <Route element={<Home />} path="/" />
+            <Route element={<Demo />} path="/demo" />
+            <Route element={<Login />} path="/login" />
+            <Route element={<Register />} path="/register" />
+            <Route element={<User />} path="/user" />
+            <Route
+              element={
+                <div>
+                  <FileUpload />
+                  <FileTable />
+                </div>
+              }
+              path="/admin"
+            />
+           
+            <Route element={<h1>Not found!</h1>} />
+          </Routes>
+          <Footer />
+        </ScrollToTop>
+      </BrowserRouter>
+    </div>
+  );
 };
 
 export default injectContext(Layout);
