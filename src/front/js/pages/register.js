@@ -5,7 +5,6 @@ import "../../styles/register.css";
 import Swal from "sweetalert2";
 
 export const Register = () => {
-  //register
   const { actions, store } = useContext(Context);
   const navigate = useNavigate();
   const [userData, setUserData] = useState({
@@ -36,7 +35,6 @@ export const Register = () => {
     }
   };
 
-  //register(logic)
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (checkTerms) {

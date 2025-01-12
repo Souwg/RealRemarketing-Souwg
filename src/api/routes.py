@@ -23,6 +23,8 @@ import pandas as pd
 app = Flask(__name__)
 bcrypt = Bcrypt(app)
 api = Blueprint('api', __name__)
+REGRID_API_TOKEN = "eyJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJyZWdyaWQuY29tIiwiaWF0IjoxNzM2NDQzNDU4LCJleHAiOjE3MzkwMzU0NTgsInUiOjQ4MjQxNSwiZyI6MjMxNTMsImNhcCI6InBhOnRzOnBzOmJmOm1hOnR5OmVvOnpvOnNiIn0.GxFicvA7XmyTh2uIIgJ-HwqN1NT3eQ6NArT1KkbrAT4"
+REGRID_API_URL = "https://app.regrid.com/api/v2/parcels/apn"
 
 
 CORS(api)
@@ -121,10 +123,10 @@ def upload_file():
         for _, row in df.iterrows():
             file_row = Files(
                 Filename=filename,
-                Acres=row.get('Acres'),
+                Acres=row.get('Acres') ,
                 County=row.get('County'),
                 Owner=row.get('Owner'),
-                Parcel=row.get('Parcel #'),
+                Parcel=row.get('Parcel #') or row.get('Account Number'),
                 Range=row.get('Range'),
                 Section=row.get('Section'),
                 StartingBid=row.get('Starting Bid'),
@@ -172,6 +174,9 @@ def get_all_files():
     except Exception as e:
         print(f"Error al obtener los archivos: {e}")
         return jsonify({"error": f"Error al obtener los archivos: {str(e)}"}), 500
+    
+#Regrid API
+
 
 
 

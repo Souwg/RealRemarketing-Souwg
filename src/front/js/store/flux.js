@@ -111,7 +111,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 				}
 			},
 			
-			//action get files from data
+			//get action files from data
 			getAllFiles: async () => {
 				try {
 					const response = await fetch("https://studious-palm-tree-7v4xxv5wq5x2pj99-3001.app.github.dev/api/files", {
@@ -128,7 +128,24 @@ const getState = ({ getStore, getActions, setStore }) => {
 					console.error("Error al obtener la lista de archivos:", error.nessage);
 					return [];
 				}
-			}
+			},
+
+			//get action Regrid's API
+			getParcelData: async (parcelNumber) => {
+				try {
+				  const response = await fetch(
+					`https://app.regrid.com/api/v2/parcels/apn?parcelnumb=${parcelNumber}&token=eyJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJyZWdyaWQuY29tIiwiaWF0IjoxNzM2NDQzNDU4LCJleHAiOjE3MzkwMzU0NTgsInUiOjQ4MjQxNSwiZyI6MjMxNTMsImNhcCI6InBhOnRzOnBzOmJmOm1hOnR5OmVvOnpvOnNiIn0.GxFicvA7XmyTh2uIIgJ-HwqN1NT3eQ6NArT1KkbrAT4`
+				  );
+				  if (!response.ok) {
+					throw new Error("Failed to fetch parcel data.");
+				  }
+				  const data = await response.json();
+				  return data;
+				} catch (error) {
+				  console.error("Error fetching parcel data:", error.message);
+				  throw error;
+				}
+			  },	  
 		}
 	};
 };

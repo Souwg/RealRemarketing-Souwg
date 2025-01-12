@@ -1,13 +1,85 @@
-import React, { useState, useEffect, useContext } from "react";
-import { Link } from "react-router-dom";
-import { Context } from "../store/appContext";
+/*import React, { useState } from "react";
+import "../../styles/demo.css"
 
 export const Demo = () => {
-	
+  const [parcelNumber, setParcelNumber] = useState("");
+  const [parcelData, setParcelData] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-	return (
-		<p>demo
-		</p>
-		
-	);
-};
+  const handleInputChange = (event) => {
+    setParcelNumber(event.target.value);
+  };
+
+  const fetchParcelData = async () => {
+    setLoading(true);
+    setError("");
+    setParcelData(null);
+
+    try {
+      const response = await fetch(
+        `https://app.regrid.com/api/v2/parcels/apn?parcelnumb=${parcelNumber}&token=eyJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJyZWdyaWQuY29tIiwiaWF0IjoxNzM2NDQzNDU4LCJleHAiOjE3MzkwMzU0NTgsInUiOjQ4MjQxNSwiZyI6MjMxNTMsImNhcCI6InBhOnRzOnBzOmJmOm1hOnR5OmVvOnpvOnNiIn0.GxFicvA7XmyTh2uIIgJ-HwqN1NT3eQ6NArT1KkbrAT4`
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch parcel data.");
+      }
+
+      const data = await response.json();
+      if (data.parcels.features.length === 0) {
+        throw new Error("No parcel found with the provided number.");
+      }
+
+      setParcelData(data.parcels.features[0]);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="parcel-info-container">
+      <h2>Parcel Information</h2>
+      <div className="input-container">
+        <input
+          type="text"
+          placeholder="Enter Parcel Number (APN)"
+          value={parcelNumber}
+          onChange={handleInputChange}
+          className="parcel-input"
+        />
+        <button onClick={fetchParcelData} className="fetch-button">
+          Parcel Info
+        </button>
+      </div>
+
+      {loading && <p>Loading...</p>}
+
+      {error && <p className="error-message">{error}</p>}
+
+      {parcelData && (
+        <div className="parcel-table-container">
+          <table className="parcel-table">
+            <thead>
+              <tr>
+                <th>Field</th>
+                <th>Value</th>
+              </tr>
+            </thead>
+            <tbody>
+              {Object.entries(parcelData.properties.fields).map(
+                ([key, value]) => (
+                  <tr key={key}>
+                    <td>{key}</td>
+                    <td>{value}</td>
+                  </tr>
+                )
+              )}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  );
+};*/

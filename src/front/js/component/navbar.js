@@ -28,13 +28,23 @@ export const Navbar = () => {
         <div className="collapse navbar-collapse" id="navbarNav">
           <ul className="navbar-nav ms-auto align-items-center">
             <li className="nav-item">
-              <Link className="nav-link fw-semibold text-dark" to="/">
+              <Link className="nav-link fw-bold text-dark" to="/">
                 Home
               </Link>
             </li>
             <li className="nav-item">
-              <Link className="nav-link fw-semibold text-dark" to="demo">
+              <Link className="nav-link fw-semibold text-dark" to="/demo">
                 Demo
+              </Link>
+            </li>
+            <li className="nav-item">
+              <Link className="nav-link fw-semibold text-dark" to="/demo2">
+              Demo 2
+              </Link>
+            </li>
+            <li className="nav-item">
+              <Link className="nav-link fw-semibold text-dark" to="/admin">
+              Admin
               </Link>
             </li>
             <li className="nav-item dropdown">
