@@ -1,5 +1,4 @@
-import Swal from "sweetalert2";
-
+const backendURL = process.env.BACKEND_URL
 const getState = ({ getStore, getActions, setStore }) => {
 	return {
 		store: {
@@ -11,7 +10,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 			//action Register user and admin
 			signupUser: async (name, last_name, email, password) => {
 				try {
-					const response = await fetch(`https://studious-palm-tree-7v4xxv5wq5x2pj99-3001.app.github.dev/api/signup`, {
+					const response = await fetch(backendURL + `signup`, {
 						method: "POST",
 						headers: {
 							"Content-Type": "application/json",
@@ -41,7 +40,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 			//action login user and admin 
 			loginUser: async (email, password) => {
                 try {
-                    const response = await fetch("https://studious-palm-tree-7v4xxv5wq5x2pj99-3001.app.github.dev/api/login", {
+                    const response = await fetch(backendURL + "login", {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({ email, password }),
@@ -69,7 +68,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 				formData.append("file", file);
 		
 				try {
-				  const response = await fetch("https://studious-palm-tree-7v4xxv5wq5x2pj99-3001.app.github.dev/api/upload", {
+				  const response = await fetch(backendURL + "upload", {
 					method: "POST",
 					body: formData,
 				  });
@@ -93,7 +92,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 			  //action delete all files
 			  deleteAllFiles: async () => {
 				try {
-					const response = await fetch("https://studious-palm-tree-7v4xxv5wq5x2pj99-3001.app.github.dev/api/delete-all-files", {
+					const response = await fetch(backendURL + "delete-all-files", {
 						method: "DELETE",
 					});
 			
@@ -114,7 +113,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 			//get action files from data
 			getAllFiles: async () => {
 				try {
-					const response = await fetch("https://studious-palm-tree-7v4xxv5wq5x2pj99-3001.app.github.dev/api/files", {
+					const response = await fetch(backendURL + "files", {
 						method: "GET",
 					});
 			
