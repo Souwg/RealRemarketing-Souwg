@@ -4,7 +4,7 @@ import ScrollToTop from "./component/scrollToTop";
 import { BackendURL } from "./component/backendURL";
 
 import { Home } from "./pages/home";
-/*import { Demo } from "./pages/demo";*/
+import { Demo } from "./pages/demo";
 import { DemoNumberTwo } from "./pages/demo2";
 import { Register } from "./pages/register";
 import { Login } from "./pages/login";
@@ -29,7 +29,7 @@ const Layout = () => {
           <Navbar />
           <Routes>
             <Route element={<Home />} path="/" />
-            {/*<Route element={<Demo />} path="/demo" />*/}
+            <Route element={<Demo />} path="/demo" />
             <Route element={<DemoNumberTwo />} path="/demo2"/>
             <Route element={<Login />} path="/login" />
             <Route element={<Register />} path="/register" />

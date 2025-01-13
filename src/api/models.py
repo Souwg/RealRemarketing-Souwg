@@ -23,17 +23,17 @@ class User(db.Model):
             "is_admin": self.is_admin,
         }
 class Files(db.Model):
-    id = db.Column(db.Integer, primary_key=True)  
-    Filename = db.Column(db.String(255), nullable=False)  
+    id = db.Column(db.Integer, primary_key=True)
+    Parcel = db.Column(db.String(255), nullable=True)   
     Acres = db.Column(db.String(255), nullable=True)  
     County = db.Column(db.String(255), nullable=True)  
-    Owner = db.Column(db.String(255), nullable=True) 
-    Parcel = db.Column(db.String(255), nullable=True)
+    Owner = db.Column(db.String(255), nullable=True)  
     Range = db.Column(db.String(255), nullable=True)
     Section = db.Column(db.String(255), nullable=True)
     StartingBid = db.Column(db.String(255), nullable=True)
     State= db.Column(db.String(255), nullable=True)
     Township= db.Column(db.String(255), nullable=True)
+    Filename = db.Column(db.String(255), nullable=False)
 
     def __repr__(self):
         return f'<FileRow {self.Filename}>'

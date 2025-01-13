@@ -1,4 +1,4 @@
-/*import React, { useState } from "react";
+import React, { useState } from "react";
 import "../../styles/demo.css"
 
 export const Demo = () => {
@@ -18,7 +18,7 @@ export const Demo = () => {
 
     try {
       const response = await fetch(
-        `https://app.regrid.com/api/v2/parcels/apn?parcelnumb=${parcelNumber}&token=eyJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJyZWdyaWQuY29tIiwiaWF0IjoxNzM2NDQzNDU4LCJleHAiOjE3MzkwMzU0NTgsInUiOjQ4MjQxNSwiZyI6MjMxNTMsImNhcCI6InBhOnRzOnBzOmJmOm1hOnR5OmVvOnpvOnNiIn0.GxFicvA7XmyTh2uIIgJ-HwqN1NT3eQ6NArT1KkbrAT4`
+        `https://app.regrid.com/api/v2/parcels/apn?parcelnumb=${parcelNumber}&token=eyJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJyZWdyaWQuY29tIiwiaWF0IjoxNzM0OTExMTMwLCJleHAiOjE3Mzc1MDMxMzAsInUiOjIyMjE5NywiZyI6MjMxNTMsImNhcCI6InBhOnRzOnBzOmJmOm1hOnR5OmVvOnpvOnNiIn0.tDZnEGoX7BXvYyA3KpHrya1SQCkBRKCuN375fK4GhAs`
       );
 
       if (!response.ok) {
@@ -82,4 +82,4 @@ export const Demo = () => {
       )}
     </div>
   );
-};*/
+};
