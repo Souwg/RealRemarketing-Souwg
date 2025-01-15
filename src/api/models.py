@@ -52,3 +52,45 @@ class Files(db.Model):
             "State": self.State,
             "Township": self.Township,
         }
+    
+class Property(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    parcel_number = db.Column(db.String(50), nullable=False)
+    owner = db.Column(db.String(120), nullable=True)
+    zoning = db.Column(db.String(50), nullable=True)
+    year_built = db.Column(db.Integer, nullable=True)
+    improvement_value = db.Column(db.Float, nullable=True)
+    land_value = db.Column(db.Float, nullable=True)
+    parcel_value = db.Column(db.Float, nullable=True)
+    mail_address = db.Column(db.String(200), nullable=True)
+    mail_city = db.Column(db.String(50), nullable=True)
+    mail_state = db.Column(db.String(50), nullable=True)
+    mail_zip = db.Column(db.String(20), nullable=True)
+    mail_country = db.Column(db.String(50), nullable=True)
+    address = db.Column(db.String(200), nullable=True)
+    latitude = db.Column(db.Float, nullable=True)
+    longitude = db.Column(db.Float, nullable=True)
+    acre = db.Column(db.Float, nullable=True)
+    acre_sqft = db.Column(db.Float, nullable=True)
+
+    def serialize(self):
+        return {
+            "id": self.id,
+            "parcel_number": self.parcel_number,
+            "owner": self.owner,
+            "zoning": self.zoning,
+            "year_built": self.year_built,
+            "improvement_value": self.improvement_value,
+            "land_value": self.land_value,
+            "parcel_value": self.parcel_value,
+            "mail_address": self.mail_address,
+            "mail_city": self.mail_city,
+            "mail_state": self.mail_state,
+            "mail_zip": self.mail_zip,
+            "mail_country": self.mail_country,
+            "address": self.address,
+            "latitude": self.latitude,
+            "longitude": self.longitude,
+            "acre": self.acre,
+            "acre_sqft": self.acre_sqft,
+        }

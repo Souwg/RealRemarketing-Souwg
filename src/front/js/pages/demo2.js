@@ -1,8 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import Swal from "sweetalert2";
 import "../../styles/demo2.css";
+import { Context } from "../store/appContext";
 
 export const DemoNumberTwo = () => {
+  const { actions } = useContext(Context);
   const [file, setFile] = useState(null);
   const [parcelDataList, setParcelDataList] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -33,7 +35,7 @@ export const DemoNumberTwo = () => {
   const fetchParcelData = async (parcelNumber) => {
     try {
       const response = await fetch(
-        `https://app.regrid.com/api/v2/parcels/apn?parcelnumb=${parcelNumber}&token=eyJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJyZWdyaWQuY29tIiwiaWF0IjoxNzM0OTExMTMwLCJleHAiOjE3Mzc1MDMxMzAsInUiOjIyMjE5NywiZyI6MjMxNTMsImNhcCI6InBhOnRzOnBzOmJmOm1hOnR5OmVvOnpvOnNiIn0.tDZnEGoX7BXvYyA3KpHrya1SQCkBRKCuN375fK4GhAs`
+        `https://app.regrid.com/api/v2/parcels/apn?parcelnumb=${parcelNumber}&token=eyJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJyZWdyaWQuY29tIiwiaWF0IjoxNzM2NDQzNDU4LCJleHAiOjE3MzkwMzU0NTgsInUiOjQ4MjQxNSwiZyI6MjMxNTMsImNhcCI6InBhOnRzOnBzOmJmOm1hOnR5OmVvOnpvOnNiIn0.GxFicvA7XmyTh2uIIgJ-HwqN1NT3eQ6NArT1KkbrAT4`
       );
       if (!response.ok) throw new Error(`Failed to fetch parcel: ${parcelNumber}`);
       const data = await response.json();
@@ -59,7 +61,10 @@ export const DemoNumberTwo = () => {
       return Swal.fire("Header not found in the file.", "", "error");
     }
 
-    const parcelNumbers = lines.slice(1).map((line) => line.split(",")[headerIndex]?.trim()).filter((num) => /^[0-9]+$/.test(num));
+    const parcelNumbers = lines
+      .slice(1)
+      .map((line) => line.split(",")[headerIndex]?.trim())
+      .filter((num) => /^[0-9]+$/.test(num));
 
     if (!parcelNumbers.length) {
       setLoading(false);
@@ -67,10 +72,17 @@ export const DemoNumberTwo = () => {
     }
 
     const parcels = await Promise.all(parcelNumbers.map(fetchParcelData));
-    setParcelDataList(parcels.filter(Boolean));
-    setLoading(false);
+    const validParcels = parcels.filter(Boolean);
+    setParcelDataList(validParcels);
 
-    Swal.fire("File processed successfully!", `Fetched data for ${parcels.length} parcels.`, "success");
+    try {
+      await actions.uploadParcels(validParcels);
+      Swal.fire("File processed successfully!", `Fetched data for ${validParcels.length} parcels.`, "success");
+    } catch (error) {
+      Swal.fire("Failed to upload parcels to the server.", "", "error");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
