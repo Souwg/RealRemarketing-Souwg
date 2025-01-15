@@ -7,6 +7,7 @@ from flask_bcrypt import Bcrypt
 from src.api.utils import APIException, generate_sitemap
 from .models import User
 from .models import Files, db
+from .models import Property, db
 from flask_cors import CORS
 import jwt
 import os
@@ -175,7 +176,42 @@ def get_all_files():
         print(f"Error al obtener los archivos: {e}")
         return jsonify({"error": f"Error al obtener los archivos: {str(e)}"}), 500
     
-#Regrid API
+#Regrid API con carga de archivo csv
+@api.route('/uploadproperties', methods=['POST'])
+def upload_properties():
+    body = request.get_json()
+
+    if not body or not body.get('parcels'):
+        return jsonify({"msg": "No data provided"}), 400
+
+    parcels = body.get('parcels')
+
+    for parcel in parcels:
+        property_data = parcel.get('properties', {}).get('fields', {})
+        property_entry = Property(
+            parcel_number=property_data.get('parcelnumb'),
+            owner=property_data.get('owner'),
+            zoning=property_data.get('zoning'),
+            year_built=property_data.get('yearbuilt'),
+            improvement_value=property_data.get('improvval'),
+            land_value=property_data.get('landval'),
+            parcel_value=property_data.get('parval'),
+            mail_address=property_data.get('mailadd'),
+            mail_city=property_data.get('mail_city'),
+            mail_state=property_data.get('mail_state2'),
+            mail_zip=property_data.get('mail_zip'),
+            mail_country=property_data.get('mail_country'),
+            address=property_data.get('address'),
+            latitude=property_data.get('lat'),
+            longitude=property_data.get('lon'),
+            acre=property_data.get('ll_gisacre'),
+            acre_sqft=property_data.get('ll_gissqft'),
+        )
+        db.session.add(property_entry)
+
+    db.session.commit()
+    return jsonify({"msg": "Properties saved successfully"}), 200
+
 
 
 

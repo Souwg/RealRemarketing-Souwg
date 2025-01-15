@@ -5,6 +5,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 			token: localStorage.getItem("token") || null,
             user: null,
 			uploadedFile: null,
+			parcels: [],
 		},
 		actions: {
 			//action Register user and admin
@@ -128,20 +129,26 @@ const getState = ({ getStore, getActions, setStore }) => {
 					return [];
 				}
 			},
-
-			//get action Regrid's API
-			getParcelData: async (parcelNumber) => {
+			
+			  uploadParcels: async (parcels) => {
 				try {
-				  const response = await fetch(
-					`https://app.regrid.com/api/v2/parcels/apn?parcelnumb=${parcelNumber}&token=eyJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJyZWdyaWQuY29tIiwiaWF0IjoxNzM2NDQzNDU4LCJleHAiOjE3MzkwMzU0NTgsInUiOjQ4MjQxNSwiZyI6MjMxNTMsImNhcCI6InBhOnRzOnBzOmJmOm1hOnR5OmVvOnpvOnNiIn0.GxFicvA7XmyTh2uIIgJ-HwqN1NT3eQ6NArT1KkbrAT4`
-				  );
+				  const response = await fetch(backendURL + "uploadproperties", {
+					method: "POST",
+					headers: {
+					  "Content-Type": "application/json",
+					},
+					body: JSON.stringify({ parcels }),
+				  });
+		
 				  if (!response.ok) {
-					throw new Error("Failed to fetch parcel data.");
+					throw new Error("Failed to upload properties");
 				  }
+		
 				  const data = await response.json();
+				  console.log("Upload success:", data);
 				  return data;
 				} catch (error) {
-				  console.error("Error fetching parcel data:", error.message);
+				  console.error("Error uploading parcels:", error);
 				  throw error;
 				}
 			  },	  
