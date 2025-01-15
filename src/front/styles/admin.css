@@ -132,61 +132,72 @@
   }
 }
 
-
+/* Menu container and button styles */
 .menu-container {
   position: relative;
-  display:inline-flex;
-  align-items:flex-end;
+  display: inline-flex;
+  align-items: center;
   margin-left: 10px;
 }
 
 .menu-button {
-  background: transparent;
+  background: #f1f1f1;
   border: none;
   border-radius: 50%;
-  font-size: 20px;
-  cursor: pointer;
+  font-size: 18px;
   width: 40px;
   height: 40px;
   display: flex;
   justify-content: center;
   align-items: center;
+  cursor: pointer;
   transition: background-color 0.3s ease, transform 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .menu-button:hover {
-  background-color: #e9ecef;
+  background-color: #e0e0e0;
   transform: scale(1.1);
 }
 
 .menu-dropdown {
   position: absolute;
-  top: 50px;
-  right: 0;
+  top: 42px; /* Más cerca del botón */
+  right: -5px; /* Alineado mejor con el botón */
   background: #ffffff;
   border: 1px solid #d3d3d3;
-  border-radius: 8px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  border-radius: 6px; /* Bordes suaves */
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
   z-index: 1000;
   padding: 10px 0;
-  width: 200px;
+  width: 180px;
+  pointer-events: auto;
+  transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
+}
+
+.menu-container:hover .menu-dropdown {
+  display: block;
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .menu-item {
   background: none;
   border: none;
-  padding: 10px 20px;
+  padding: 10px 16px;
   font-size: 14px;
-  color: #d33;
+  color: #e74c3c; /* Rojo moderno */
   text-align: left;
   width: 100%;
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 .menu-item:hover {
-  background-color: #f8d7da;
+  background-color: #fceae9;
+  color: #c0392b; /* Rojo más oscuro al hover */
 }
+
 
 .button-container {
   display: flex;
@@ -194,6 +205,7 @@
   align-items: center;
 }
 
+/* File table container */
 .file-table-container {
   margin-top: 20px;
   padding: 10px;
@@ -217,7 +229,8 @@
   margin-top: 10px;
 }
 
-.file-table th, .file-table td {
+.file-table th,
+.file-table td {
   border: 1px solid #ddd;
   padding: 10px;
   text-align: left;

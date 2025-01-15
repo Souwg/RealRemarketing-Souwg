@@ -9,7 +9,7 @@ export const FileUpload = () => {
   const [files, setFiles] = useState([]);
   const [menuOpen, setMenuOpen] = useState(false);
 
-  const handleDelete = async () => {
+  const handleDelete = () => {
     Swal.fire({
       title: "Are you sure?",
       text: "You won't be able to revert this!",
@@ -17,22 +17,22 @@ export const FileUpload = () => {
       showCancelButton: true,
       confirmButtonColor: "#3085d6",
       cancelButtonColor: "#d33",
-      confirmButtonText: "Yes, delete it!"
+      confirmButtonText: "Yes, delete it!",
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          await actions.deleteAllFiles();
-          setFiles([]);
+          await actions.deleteAllFiles(); // Llama la acción para eliminar los archivos
+          setFiles([]); // Actualiza el estado de 'files' a un array vacío
           Swal.fire({
             title: "Deleted!",
             text: "Your files have been deleted.",
-            icon: "success"
+            icon: "success",
           });
         } catch (error) {
           Swal.fire({
             icon: "error",
             title: "Error",
-            text: "Failed to delete records. Please try again."
+            text: "There was a problem deleting the files.",
           });
         }
       }
@@ -49,27 +49,27 @@ export const FileUpload = () => {
       Swal.fire({
         icon: "warning",
         title: "Oops...",
-        text: "Please select a file."
+        text: "Please select a file.",
       });
       return;
     }
     try {
-      const uploadedFiles = await actions.uploadFile(file); 
-      setFiles(uploadedFiles); 
+      // Llamar al método actions.uploadFile y manejar errores
+      await actions.uploadFile(file);
       Swal.fire({
         icon: "success",
         title: "Success!",
-        text: `The file ${file.name} has been successfully uploaded.`
+        text: `The file ${file.name} has been successfully uploaded.`,
       });
     } catch (error) {
+      // Mostrar un mensaje de error si ocurre un problema, como un archivo duplicado
       Swal.fire({
         icon: "error",
-        title: "Error",
-        text: error.message
+        title: "This file is already registered.",
+        text: error.message,
       });
     }
   };
-
   useEffect(() => {
     // Obtener la lista de archivos al cargar el componente
     const fetchFiles = async () => {
@@ -78,7 +78,6 @@ export const FileUpload = () => {
     };
     fetchFiles();
   }, [actions]);
-
   return (
     <div className="upload-container">
       <form className="upload-form" onSubmit={handleSubmit}>
@@ -101,12 +100,17 @@ export const FileUpload = () => {
             <button
               type="button"
               className="menu-button"
-              onClick={() => setMenuOpen(!menuOpen)}
+              onMouseEnter={() => setMenuOpen(true)}
+              onMouseLeave={() => setMenuOpen(false)}
             >
-              ☰
+              ⋮ {/* Cambiado a tres puntos verticales */}
             </button>
             {menuOpen && (
-              <div className="menu-dropdown">
+              <div
+                className="menu-dropdown"
+                onMouseEnter={() => setMenuOpen(true)}
+                onMouseLeave={() => setMenuOpen(false)}
+              >
                 <button
                   type="button"
                   onClick={handleDelete}
