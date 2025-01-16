@@ -24,6 +24,8 @@ export const DemoNumberTwo = () => {
     mail_zip: "Mail Zip",
     mail_country: "Mail Country",
     address: "Address",
+    state2: "State",
+    szip: "Zip Code",
     lat: "Latitude",
     lon: "Longitude",
     ll_gisacre: "Acre",
