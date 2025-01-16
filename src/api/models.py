@@ -78,8 +78,7 @@ class Property(db.Model):
     county = db.Column(db.String(50), nullable=True)
     state = db.Column(db.String(50), nullable=True)
     legal_description = db.Column(db.String(180), nullable=True)
-    fema_flood_zone = db.Column(db.String(150), nullable=True)
-    block = db.Column(db.Float, nullable=True)
+    fema_flood_zone = db.Column(db.JSON, nullable=True)
 
 
 def serialize(self):
@@ -108,5 +107,4 @@ def serialize(self):
         "state": self.state,
         "legal_description": self.legal_description,
         "fema_flood_zone": self.fema_flood_zone,
-        "block": self.block,
      }

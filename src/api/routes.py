@@ -93,7 +93,7 @@ def login_user():
         "user": user.serialize()
     }), 200
 
-#upload endpoint
+#upload file
 @api.route('/upload', methods=['POST'])
 def upload_file():
     if 'file' not in request.files:
@@ -168,6 +168,7 @@ def get_all_files():
         print(f"Error al obtener los archivos: {e}")
         return jsonify({"error": f"Error al obtener los archivos: {str(e)}"}), 500
     
+
 #upload properties with regrid
 @api.route('/uploadproperties', methods=['POST'])
 def upload_properties():
@@ -198,13 +199,13 @@ def upload_properties():
             building_SQFT=property_data.get('ll_bldg_footprint_sqft'),
             building_count=property_data.get('ll_bldg_count'),
             legal_description=property_data.get('legaldesc'),
-            
             county=property_data.get('county'),
             state=property_data.get('state2'),
             latitude=property_data.get('lat'),
             longitude=property_data.get('lon'),
             acre=property_data.get('ll_gisacre'),
             acre_sqft=property_data.get('ll_gissqft'),
+            fema_flood_zone=property_data.get('fema_flood_zone_raw'),
         )
         db.session.add(property_entry)
 
@@ -222,11 +223,21 @@ def delete_properties():
         db.session.rollback()
         print(f"Error al eliminar los registros: {e}")
         return jsonify({"error": f"Error al eliminar los registros: {str(e)}"}), 500
-
-#@api.route('/delete/onebyone', methods=['DELETE'])
-#def delete_onebyone():
-#    try:
-#        db.session
+    
+#delete one by one property
+@api.route('/delete/property/<string:parcel_number>', methods=['DELETE'])
+def delete_property(parcel_number):
+    try:
+        property_to_delete = Property.query.filter_by(parcel_number=parcel_number).first()
+        if not property_to_delete:
+            return jsonify({"message": "Property not found"}), 404
+        db.session.delete(property_to_delete)
+        db.session.commit()
+        return jsonify({"message": f"Property with parcel number {parcel_number} has been deleted"}), 200
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error while deleting the property: {e}")
+        return jsonify({"error": f"Error while deleting the property: {str(e)}"}), 500
 
 
 
