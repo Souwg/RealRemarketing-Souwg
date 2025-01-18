@@ -1,21 +1,6 @@
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700&display=swap');
 
 .title{
-  font-family: Montserrat, 'Times New Roman', Times, serif;
+  
+  text-align: center;
+  color: #000;
 }
-.nav-item.dropdown:hover .dropdown-menu {
-    display: block;
-    margin-top: 0;
-  }
-  
-  .dropdown-menu {
-    transition: all 0.3s ease-in-out;
-    opacity: 0;
-    visibility: hidden;
-  }
-  
-  .nav-item.dropdown:hover .dropdown-menu {
-    opacity: 1;
-    visibility: visible;
-  }
-  
