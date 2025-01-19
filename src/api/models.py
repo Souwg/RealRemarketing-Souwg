@@ -57,40 +57,54 @@ class Property(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     parcel_number = db.Column(db.String(50), nullable=False)
     owner = db.Column(db.String(120), nullable=True)
-    zoning = db.Column(db.String(50), nullable=True)
     year_built = db.Column(db.Integer, nullable=True)
-    improvement_value = db.Column(db.Float, nullable=True)
-    land_value = db.Column(db.Float, nullable=True)
-    parcel_value = db.Column(db.Float, nullable=True)
+    building_SQFT = db.Column(db.String(100), nullable=True)
+    building_count = db.Column(db.String(50), nullable=True)
+    acre = db.Column(db.Float, nullable=True)
+    acre_sqft = db.Column(db.Float, nullable=True)
+    address = db.Column(db.String(200), nullable=True)
     mail_address = db.Column(db.String(200), nullable=True)
     mail_city = db.Column(db.String(50), nullable=True)
     mail_state = db.Column(db.String(50), nullable=True)
     mail_zip = db.Column(db.String(20), nullable=True)
     mail_country = db.Column(db.String(50), nullable=True)
-    address = db.Column(db.String(200), nullable=True)
     latitude = db.Column(db.Float, nullable=True)
     longitude = db.Column(db.Float, nullable=True)
-    acre = db.Column(db.Float, nullable=True)
-    acre_sqft = db.Column(db.Float, nullable=True)
+    zip_code = db.Column(db.String(50), nullable=True)
+    improvement_value = db.Column(db.Float, nullable=True)
+    land_value = db.Column(db.Float, nullable=True)
+    parcel_value = db.Column(db.Float, nullable=True)
+    zoning = db.Column(db.String(50), nullable=True)
+    county = db.Column(db.String(50), nullable=True)
+    state = db.Column(db.String(50), nullable=True)
+    legal_description = db.Column(db.String(180), nullable=True)
+    fema_flood_zone = db.Column(db.JSON, nullable=True)
 
-    def serialize(self):
-        return {
-            "id": self.id,
-            "parcel_number": self.parcel_number,
-            "owner": self.owner,
-            "zoning": self.zoning,
-            "year_built": self.year_built,
-            "improvement_value": self.improvement_value,
-            "land_value": self.land_value,
-            "parcel_value": self.parcel_value,
-            "mail_address": self.mail_address,
-            "mail_city": self.mail_city,
-            "mail_state": self.mail_state,
-            "mail_zip": self.mail_zip,
-            "mail_country": self.mail_country,
-            "address": self.address,
-            "latitude": self.latitude,
-            "longitude": self.longitude,
-            "acre": self.acre,
-            "acre_sqft": self.acre_sqft,
-        }
+
+def serialize(self):
+    return {
+        "id": self.id,
+        "parcel_number": self.parcel_number,
+        "owner": self.owner,
+        "address": self.address,
+        "mail_address": self.mail_address,
+        "mail_city": self.mail_city,
+        "mail_state": self.mail_state,
+        "mail_zip": self.mail_zip,
+        "mail_country": self.mail_country,
+        "zip_code": self.zip_code,
+        "latitude": self.latitude,
+        "longitude": self.longitude,
+        "improvement_value": self.improvement_value,
+        "land_value": self.land_value,
+        "parcel_value": self.parcel_value,
+        "acre": self.acre,
+        "acre_sqft": self.acre_sqft,
+        "building_SQFT": self.building_SQFT,
+        "building_count": self.building_count,
+        "zoning": self.zoning,
+        "county": self.county,
+        "state": self.state,
+        "legal_description": self.legal_description,
+        "fema_flood_zone": self.fema_flood_zone,
+     }

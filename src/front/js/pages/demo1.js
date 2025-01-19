@@ -1,9 +1,9 @@
 import React, { useState, useContext, useEffect } from "react";
 import { Context } from "../store/appContext";
 import Swal from "sweetalert2";
-import "../../styles/admin.css";
+import "../../styles/demo1.css";
 
-export const FileUpload = () => {
+export const DemoOne = () => {
   const { actions } = useContext(Context);
   const [file, setFile] = useState(null);
   const [files, setFiles] = useState([]);

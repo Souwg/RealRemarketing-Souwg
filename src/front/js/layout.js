@@ -4,17 +4,18 @@ import ScrollToTop from "./component/scrollToTop";
 import { BackendURL } from "./component/backendURL";
 
 import { Home } from "./pages/home";
-import { Demo } from "./pages/demo";
-import { DemoNumberTwo } from "./pages/demo2";
+import { DemoTwo } from "./pages/demo2";
+import { DemoThree } from "./pages/demo3";
 import { Register } from "./pages/register";
 import { Login } from "./pages/login";
 import { User } from "./pages/user";
-import { FileUpload } from "./pages/admin";
+import { DemoOne} from "./pages/demo1";
 
 import injectContext from "./store/appContext";
 
 import { Navbar } from "./component/navbar";
 import { Footer } from "./component/footer";
+import Sidebar from "./component/sidebar";
 
 const Layout = () => {
   const basename = process.env.BASENAME || "";
@@ -26,19 +27,21 @@ const Layout = () => {
     <div>
       <BrowserRouter basename={basename}>
         <ScrollToTop>
-          <Navbar />
+        <Sidebar/>
+        <div className="layout-content">
+          <Navbar /> 
           <Routes>
             <Route element={<Home />} path="/" />
-            <Route element={<Demo />} path="/demo" />
-            <Route element={<DemoNumberTwo />} path="/demo2" />
+            <Route element={<DemoTwo />} path="/demo2" />
+            <Route element={<DemoThree />} path="/demo3" />
             <Route element={<Login />} path="/login" />
             <Route element={<Register />} path="/register" />
             <Route element={<User />} path="/user" />
-            <Route element={<FileUpload />} path="/admin" />
-
+            <Route element={<DemoOne />} path="/demo1" />
             <Route element={<h1>Not found!</h1>} />
           </Routes>
           <Footer />
+          </div>
         </ScrollToTop>
       </BrowserRouter>
     </div>

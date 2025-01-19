@@ -93,7 +93,7 @@ def login_user():
         "user": user.serialize()
     }), 200
 
-#upload endpoint
+#upload file
 @api.route('/upload', methods=['POST'])
 def upload_file():
     if 'file' not in request.files:
@@ -105,22 +105,17 @@ def upload_file():
         return jsonify({"error": "El archivo no tiene un nombre válido"}), 400
 
     try:
-        # Asegurar un nombre de archivo seguro
+        
         filename = secure_filename(file.filename)
-
-        # Verificar si ya existe un archivo con el mismo nombre
         existing_file = Files.query.filter_by(Filename=filename).first()
+
         if existing_file:
             return jsonify({"error": f"El archivo '{filename}' ya existe en la base de datos"}), 400
-
-        # Leer el archivo como DataFrame
         df = pd.read_csv(file)
 
-        # Validar que el DataFrame no esté vacío
         if df.empty:
             return jsonify({"error": "El archivo está vacío"}), 400
 
-        # Iterar sobre las filas y guardarlas en la base de datos
         for _, row in df.iterrows():
             file_row = Files(
                 Filename=filename,
@@ -147,7 +142,7 @@ def upload_file():
 
 
     except Exception as e:
-        db.session.rollback()  # Revertir en caso de error
+        db.session.rollback() 
         print(f"Error al procesar el archivo: {e}") 
         return jsonify({"error": f"Error al procesar el archivo: {str(e)}"}), 500
     
@@ -167,16 +162,14 @@ def delete_all_files():
 @api.route('/files', methods=['GET'])
 def get_all_files():
     try:
-        #get all register
         files = Files.query.all()
-
-        #serialize all data
         return jsonify([file.serialize() for file in files]), 200
     except Exception as e:
         print(f"Error al obtener los archivos: {e}")
         return jsonify({"error": f"Error al obtener los archivos: {str(e)}"}), 500
     
-#Regrid API con carga de archivo csv
+
+#upload properties with regrid
 @api.route('/uploadproperties', methods=['POST'])
 def upload_properties():
     body = request.get_json()
@@ -202,17 +195,49 @@ def upload_properties():
             mail_zip=property_data.get('mail_zip'),
             mail_country=property_data.get('mail_country'),
             address=property_data.get('address'),
+            zip_code=property_data.get('szip'),
+            building_SQFT=property_data.get('ll_bldg_footprint_sqft'),
+            building_count=property_data.get('ll_bldg_count'),
+            legal_description=property_data.get('legaldesc'),
+            county=property_data.get('county'),
+            state=property_data.get('state2'),
             latitude=property_data.get('lat'),
             longitude=property_data.get('lon'),
             acre=property_data.get('ll_gisacre'),
             acre_sqft=property_data.get('ll_gissqft'),
+            fema_flood_zone=property_data.get('fema_flood_zone_raw'),
         )
         db.session.add(property_entry)
 
     db.session.commit()
     return jsonify({"msg": "Properties saved successfully"}), 200
 
-
+#delete all properties
+@api.route('/delete/properties', methods=['DELETE'])
+def delete_properties():
+    try:
+        db.session.query(Property).delete()
+        db.session.commit()
+        return jsonify({"message": "Todos los archivos han sido eliminados"}), 200
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error al eliminar los registros: {e}")
+        return jsonify({"error": f"Error al eliminar los registros: {str(e)}"}), 500
+    
+#delete one by one property
+@api.route('/delete/property/<string:parcel_number>', methods=['DELETE'])
+def delete_property(parcel_number):
+    try:
+        property_to_delete = Property.query.filter_by(parcel_number=parcel_number).first()
+        if not property_to_delete:
+            return jsonify({"message": "Property not found"}), 404
+        db.session.delete(property_to_delete)
+        db.session.commit()
+        return jsonify({"message": f"Property with parcel number {parcel_number} has been deleted"}), 200
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error while deleting the property: {e}")
+        return jsonify({"error": f"Error while deleting the property: {str(e)}"}), 500
 
 
 
