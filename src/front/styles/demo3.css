@@ -266,11 +266,12 @@
 
 /*Table*/
 .parcel-table-container {
-  margin: 20px auto;
+  margin: auto;
   margin-bottom: 10%;
   max-width: 70%; /* Ajusta el ancho máximo del contenedor */
   overflow-x: auto; /* Agrega scroll horizontal si la tabla es más ancha que el contenedor */ 
-  border-radius: 15px;
+  border-top-right-radius: 50px;
+  border-top-left-radius: 50px;
   background-color: #ddd;
   padding: 10px;
 }

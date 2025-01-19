@@ -118,6 +118,7 @@ export const DemoThree = () => {
       Swal.fire("Failed to process the file.", error.message, "error");
     } finally {
       setLoading(false);
+      setFile(null); // Reinicia el estado del archivo
     }
   };
 
@@ -141,25 +142,29 @@ export const DemoThree = () => {
             {file ? file.name : "Choose a file"}
           </label>
         </div>
-        <div className="d-flex justify-content-center">
-        <div className="header-input-container">
-          <input
-            type="text"
-            placeholder={isFocused ? "" : "Parcel header"}
-            value={headerName}
-            onChange={(e) => setHeaderName(e.target.value)}
-            onFocus={() => setIsFocused(true)}
-            onBlur={() => setIsFocused(false)}
-            className="header-input"
-          />
-        </div>
-        {/*<button type="submit" className="upload-button" disabled={loading}>
+        <div className="d-flex m-auto justify-content-center">
+          <div className="header-input-container">
+            <input
+              type="text"
+              placeholder={isFocused ? "" : "Parcel header"}
+              value={headerName}
+              onChange={(e) => setHeaderName(e.target.value)}
+              onFocus={() => setIsFocused(true)}
+              onBlur={() => setIsFocused(false)}
+              className="header-input"
+            />
+          </div>
+          {/*<button type="submit" className="upload-button" disabled={loading}>
           {loading ? "Processing..." : "Upload and Fetch"}
         </button>*/}
-        <button type="submit" className="container-btn-file" disabled={loading}>
-        {loading ? "Processing..." : <i class="fa-solid fa-upload"></i>}
-        </button>
-      </div>
+          <button
+            type="submit"
+            className="container-btn-file"
+            disabled={loading}
+          >
+            {loading ? "Processing..." : <i class="fa-solid fa-upload"></i>}
+          </button>
+        </div>
       </form>
       {parcelDataList.length > 0 && (
         <div className="parcel-table-container">
@@ -175,9 +180,37 @@ export const DemoThree = () => {
             <tbody>
               {parcelDataList.map((parcel, index) => (
                 <tr key={index}>
-                  {Object.keys(headerMapping).map((key) => (
-                    <td key={key}>{parcel.properties.fields[key] || "N/A"}</td>
-                  ))}
+                  {Object.keys(headerMapping).map((key) => {
+                    const value = parcel.properties.fields[key] || "N/A";
+
+                    // Detecta si la celda es latitud o longitud
+                    if (key === "lat" || key === "lon") {
+                      const lat = parcel.properties.fields.lat;
+                      const lon = parcel.properties.fields.lon;
+
+                      // Verifica que ambos valores existan para crear el enlace
+                      if (lat && lon) {
+                        return (
+                          <td key={key}>
+                            <a
+                              href={`https://www.google.com/maps?q=${lat},${lon}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              style={{
+                                color: "blue",
+                                textDecoration: "none",
+                              }}
+                            >
+                              {value}
+                            </a>
+                          </td>
+                        );
+                      }
+                    }
+
+                    // Renderiza las demás celdas normales
+                    return <td key={key}>{value}</td>;
+                  })}
                 </tr>
               ))}
             </tbody>
