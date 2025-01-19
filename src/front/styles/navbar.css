@@ -1,6 +1,7 @@
-
+.navbar{
+  display: flex;
+  justify-content: center;
+}
 .title{
-  
-  text-align: center;
-  color: #000;
+  color: #222;
 }
