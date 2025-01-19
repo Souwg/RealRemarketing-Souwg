@@ -7,12 +7,11 @@
 }
 
 .upload-form {
-  background: #ffffff;
-  border-radius: 8px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  margin-top: 5%;
+  background: #FFF6F2;
   padding: 20px;
   text-align: center;
-  width: 100%;
+  width: auto;
 }
 
 .file-input-container {

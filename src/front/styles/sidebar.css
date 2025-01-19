@@ -1,5 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700&display=swap');
 .nav-open-icon {
+  margin-left: 3em;
+  margin-top: 1em;
   position: absolute;
   top: 20px;
   left: 20px;

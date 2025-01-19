@@ -1,51 +1,183 @@
 /* General styles */
-.upload-section {
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700&display=swap');
+/*Upload File*/
+.container {
+  --transition: 350ms;
+  --folder-W: 120px;
+  --folder-H: 80px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 10px;
+  background: linear-gradient(135deg, #6dd5ed, #2193b0);
+  border-radius: 15px;
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+  width: 40%;
+  margin-top: 2rem;
+  height: calc(var(--folder-H) * 2);
+  position: relative;
+}
+
+.folder {
+  position: absolute;
+  top: -20px;
+  left: calc(50% - 60px);
+  animation: float 2.5s infinite ease-in-out;
+  transition: transform var(--transition) ease;
+}
+
+.folder:hover {
+  transform: scale(1.05);
+}
+
+.folder .front-side,
+.folder .back-side {
+  position: absolute;
+  transition: transform var(--transition);
+  transform-origin: bottom center;
+}
+
+.folder .back-side::before,
+.folder .back-side::after {
+  content: "";
+  display: block;
+  background-color: white;
+  opacity: 0.5;
+  z-index: 0;
+  width: var(--folder-W);
+  height: var(--folder-H);
+  position: absolute;
+  transform-origin: bottom center;
+  border-radius: 15px;
+  transition: transform 350ms;
+  z-index: 0;
+}
+
+.container:hover .back-side::before {
+  transform: rotateX(-5deg) skewX(5deg);
+}
+.container:hover .back-side::after {
+  transform: rotateX(-15deg) skewX(12deg);
+}
+
+.folder .front-side {
+  z-index: 1;
+}
+
+.container:hover .front-side {
+  transform: rotateX(-40deg) skewX(15deg);
+}
+
+.folder .tip {
+  background: linear-gradient(135deg, #ff9a56, #ff6f56);
+  width: 80px;
+  height: 20px;
+  border-radius: 12px 12px 0 0;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  position: absolute;
+  top: -10px;
+  z-index: 2;
+}
+
+.folder .cover {
+  background: linear-gradient(135deg, #ffe563, #ffc663);
+  width: var(--folder-W);
+  height: var(--folder-H);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+  border-radius: 10px;
+}
+
+.custom-file-upload {
+  font-size: 1.1em;
+  color: #ffffff;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.2);
+  margin-top: 3rem;
+  border: none;
+  border-radius: 10px;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: background var(--transition) ease;
+  display: inline-block;
+  width: 100%;
+  padding: 10px 35px;
+  position: relative;
+}
+
+.custom-file-upload:hover {
+  background: rgba(255, 255, 255, 0.4);
+}
+
+.custom-file-upload input[type="file"] {
+  display: none;
+}
+
+@keyframes float {
+  0% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-20px);
+  }
+
+  100% {
+    transform: translateY(0px);
+  }
+}
+
+/*input name column*/
+.header-input {
+  border: 0; /* Elimina los bordes */
+  border-bottom: 2px solid black; /* Agrega una línea solo en la parte inferior */
+  border-radius: 0 0 10px 10px; /* Curva solo los extremos inferiores */
+  outline: none; /* Opcional: elimina el contorno al enfocar */
+  padding: 10px; /* Espaciado interno para mejorar la apariencia */
+  text-align: center;
+  background-color: transparent;
+  margin-top: 20px;
+  width: 10rem; /* Ajustar al tamaño deseado */
+  box-sizing: border-box; /* Asegura que el padding no afecte el ancho */
+}
+/*.upload-section {
   margin: 20px auto;
   max-width: 600px;
   padding: 20px;
   box-sizing: border-box;
-}
+}*/
 
-.upload-form {
-  background: #ffffff;
-  border-radius: 8px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-  padding: 20px;
-  text-align: center;
-  width: 100%;
-}
-
-.file-input-container {
+/*.file-input-container {
   margin-bottom: 15px;
   position: relative;
   border: 2px dashed #d3d3d3;
   border-radius: 8px;
   padding: 20px;
   transition: border-color 0.3s ease;
-}
+}*/
 
-.file-input-container:hover {
+/*.file-input-container:hover {
   border-color: #007bff;
-}
+}*/
 
-.file-input {
+/*.file-input {
   position: absolute;
   opacity: 0;
   width: 100%;
   height: 100%;
   cursor: pointer;
-}
+}*/
 
-.file-label {
+/*.file-label {
   font-size: 14px;
   color: #6c757d;
   cursor: pointer;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-}
+}*/
 
-.upload-button {
+/*.upload-button {
   background-color: #007bff;
   color: #ffffff;
   border: none;
@@ -79,7 +211,48 @@
   color: #666666;
   cursor: not-allowed;
   box-shadow: none;
+}*/
+
+/*upload button*/
+.container-btn-file {
+  display: flex;
+  position: relative;
+  margin-top: 1em;
+  margin-left: 1em;
+  justify-content: center;
+  align-items: center;
+  background-color: #307750;
+  color: #fff;
+  border-style: none;
+  padding: 0.8em 1em;
+  border-radius: 0.6em;
+  overflow: hidden;
+  z-index: 1;
+  box-shadow: 4px 8px 10px -3px rgba(0, 0, 0, 0.356);
+  transition: all 250ms;
 }
+.container-btn-file input[type="file"] {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.container-btn-file::before {
+  content: "";
+  position: absolute;
+  height: 100%;
+  width: 0;
+  border-radius: 0.5em;
+  background-color: #469b61;
+  z-index: -1;
+  transition: all 350ms;
+}
+.container-btn-file:hover::before {
+  width: 100%;
+}
+
 
 /* Contenedor de botones */
 .button-container {
@@ -91,100 +264,42 @@
   margin: 20px auto;
 }
 
-/* Table styles */
-.file-table-container {
-  margin-top: 20px;
+/*Table*/
+.parcel-table-container {
+  margin: 20px auto;
+  margin-bottom: 10%;
+  max-width: 70%; /* Ajusta el ancho máximo del contenedor */
+  overflow-x: auto; /* Agrega scroll horizontal si la tabla es más ancha que el contenedor */ 
+  border-radius: 15px;
+  background-color: #ddd;
   padding: 10px;
-  background-color: #f9f9f9;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.file-table-container h3 {
-  font-size: 20px;
-  font-weight: bold;
-  color: #333;
-  margin-bottom: 15px;
-  text-align: center;
-}
-
-.file-table {
-  width: 100%;
+.parcel-table {
+  width: 100%; /* La tabla ocupará el ancho completo del contenedor */
+  min-width: 600px; /* Establece un ancho mínimo para evitar que las columnas se encojan demasiado */
   border-collapse: collapse;
+  font-size: 14px; /* Ajusta el tamaño del texto */
+  font-family: 'Montserrat', sans-serif;
 }
 
-.file-table th,
-.file-table td {
+.parcel-table th,
+.parcel-table td {
   border: 1px solid #ddd;
-  padding: 8px 10px;
+  padding: 8px;
   text-align: left;
-  font-size: 14px;
+  white-space: nowrap; /* Evita que el texto se ajuste a varias líneas */
 }
 
-.file-table th {
-  background-color: #f4f4f4;
+.parcel-table th {
+  background-color: #eee;
+  text-align: center;
   font-weight: bold;
-  color: #555;
 }
 
-.file-table tbody tr:nth-child(even) {
-  background-color: #f8f8f8;
-}
-
-.file-table tbody tr:hover {
-  background-color: #e6f7ff;
-}
-
-/* Responsive adjustments */
-@media screen and (max-width: 768px) {
-  .upload-section {
-    margin: 10px auto;
-    padding: 15px;
-  }
-
-  .upload-form {
-    padding: 15px;
-  }
-
-  .file-label {
-    font-size: 12px;
-  }
-
-  .upload-button {
-    font-size: 12px;
-    padding: 8px;
-  }
-
-  .file-table th,
-  .file-table td {
-    font-size: 12px;
-    padding: 6px;
-  }
-}
-
-@media screen and (max-width: 480px) {
-  .upload-section {
-    margin: 5px auto;
-    padding: 10px;
-  }
-
-  .file-input-container {
-    padding: 10px;
-  }
-
-  .file-label {
-    font-size: 10px;
-  }
-
-  .upload-button {
-    font-size: 10px;
-    padding: 6px;
-  }
-
-  .file-table th,
-  .file-table td {
-    font-size: 10px;
-    padding: 4px;
-  }
+.parcel-table-container h3 {
+  font-family: 'Montserrat', sans-serif;
+  text-align: center;
+  font-size: 20px;
+  margin-bottom: 10px;
 }

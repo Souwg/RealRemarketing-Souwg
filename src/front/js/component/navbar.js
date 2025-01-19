@@ -7,7 +7,7 @@ export const Navbar = () => {
   // Estilo en línea que aplica la fuente
   const titleStyle = {
     fontFamily: "paramour, sans-serif",
-    fontSize: "6rem",
+    fontSize: "7rem",
   };
 
   return (

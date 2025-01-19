@@ -10,6 +10,7 @@ export const DemoThree = () => {
   const [parcelDataList, setParcelDataList] = useState([]);
   const [loading, setLoading] = useState(false);
   const [headerName, setHeaderName] = useState("");
+  const [isFocused, setIsFocused] = useState(false);
 
   const headerMapping = {
     parcelnumb: "Parcel Number",
@@ -63,7 +64,8 @@ export const DemoThree = () => {
       const response = await fetch(
         `https://app.regrid.com/api/v2/parcels/apn?parcelnumb=${parcelNumber}&token=eyJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJyZWdyaWQuY29tIiwiaWF0IjoxNzM2NDQzNDU4LCJleHAiOjE3MzkwMzU0NTgsInUiOjQ4MjQxNSwiZyI6MjMxNTMsImNhcCI6InBhOnRzOnBzOmJmOm1hOnR5OmVvOnpvOnNiIn0.GxFicvA7XmyTh2uIIgJ-HwqN1NT3eQ6NArT1KkbrAT4`
       );
-      if (!response.ok) throw new Error(`Failed to fetch parcel: ${parcelNumber}`);
+      if (!response.ok)
+        throw new Error(`Failed to fetch parcel: ${parcelNumber}`);
       const data = await response.json();
       return data.parcels?.features[0] || null;
     } catch {
@@ -74,7 +76,12 @@ export const DemoThree = () => {
   const handleFileUpload = async (event) => {
     event.preventDefault();
     if (!file) return Swal.fire("Please select a file.", "", "warning");
-    if (!headerName) return Swal.fire("Please specify the column header for parcel numbers.", "", "warning");
+    if (!headerName)
+      return Swal.fire(
+        "Please specify the column header for parcel numbers.",
+        "",
+        "warning"
+      );
 
     setLoading(true);
     try {
@@ -102,7 +109,11 @@ export const DemoThree = () => {
       setParcelDataList(validParcels);
 
       await actions.uploadParcels(validParcels);
-      Swal.fire("File processed successfully!", `Fetched data for ${validParcels.length} parcels.`, "success");
+      Swal.fire(
+        "File processed successfully!",
+        `Fetched data for ${validParcels.length} parcels.`,
+        "success"
+      );
     } catch (error) {
       Swal.fire("Failed to process the file.", error.message, "error");
     } finally {
@@ -113,24 +124,43 @@ export const DemoThree = () => {
   return (
     <div className="upload-and-parcel-container">
       <form onSubmit={handleFileUpload} className="upload-form">
-        <div className="file-input-container">
+        {/*<div className="file-input-container">
           <input type="file" onChange={handleFileChange} className="file-input" />
           <label className="file-label">{file ? file.name : "Click to browse a file"}</label>
+        </div>*/}
+        <div className="container">
+          <div className="folder">
+            <div className="front-side">
+              <div className="tip"></div>
+              <div className="cover"></div>
+            </div>
+            <div className="back-side cover"></div>
+          </div>
+          <label className="custom-file-upload">
+            <input className="title" type="file" onChange={handleFileChange} />
+            {file ? file.name : "Choose a file"}
+          </label>
         </div>
+        <div className="d-flex justify-content-center">
         <div className="header-input-container">
           <input
             type="text"
-            placeholder="Enter parcel number column header"
+            placeholder={isFocused ? "" : "Parcel header"}
             value={headerName}
             onChange={(e) => setHeaderName(e.target.value)}
+            onFocus={() => setIsFocused(true)}
+            onBlur={() => setIsFocused(false)}
             className="header-input"
           />
         </div>
-        <button type="submit" className="upload-button" disabled={loading}>
+        {/*<button type="submit" className="upload-button" disabled={loading}>
           {loading ? "Processing..." : "Upload and Fetch"}
+        </button>*/}
+        <button type="submit" className="container-btn-file" disabled={loading}>
+        {loading ? "Processing..." : <i class="fa-solid fa-upload"></i>}
         </button>
+      </div>
       </form>
-
       {parcelDataList.length > 0 && (
         <div className="parcel-table-container">
           <h3>Properties data</h3>

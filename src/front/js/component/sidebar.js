@@ -15,7 +15,6 @@ const Sidebar = () => {
 
   return (
     <div>
-      {/* Icono de hamburguesa */}
       <div
         className="nav-open-icon"
         onMouseEnter={handleMouseEnterIcon}
