@@ -5,7 +5,7 @@ db = SQLAlchemy()
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50), nullable=False)
-    last_name = db.Column(db.String(50), nullable=False)
+    last_name = db.Column(db.Text, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String(80), unique=False, nullable=False)
     is_active = db.Column(db.Boolean(), default=True)
@@ -81,30 +81,30 @@ class Property(db.Model):
     fema_flood_zone = db.Column(db.JSON, nullable=True)
 
 
-def serialize(self):
-    return {
-        "id": self.id,
-        "parcel_number": self.parcel_number,
-        "owner": self.owner,
-        "address": self.address,
-        "mail_address": self.mail_address,
-        "mail_city": self.mail_city,
-        "mail_state": self.mail_state,
-        "mail_zip": self.mail_zip,
-        "mail_country": self.mail_country,
-        "zip_code": self.zip_code,
-        "latitude": self.latitude,
-        "longitude": self.longitude,
-        "improvement_value": self.improvement_value,
-        "land_value": self.land_value,
-        "parcel_value": self.parcel_value,
-        "acre": self.acre,
-        "acre_sqft": self.acre_sqft,
-        "building_SQFT": self.building_SQFT,
-        "building_count": self.building_count,
-        "zoning": self.zoning,
-        "county": self.county,
-        "state": self.state,
-        "legal_description": self.legal_description,
-        "fema_flood_zone": self.fema_flood_zone,
-     }
+    def serialize(self):
+        return {
+            "id": self.id,
+            "parcel_number": self.parcel_number,
+            "owner": self.owner,
+            "address": self.address,
+            "mail_address": self.mail_address,
+            "mail_city": self.mail_city,
+            "mail_state": self.mail_state,
+            "mail_zip": self.mail_zip,
+            "mail_country": self.mail_country,
+            "zip_code": self.zip_code,
+            "latitude": self.latitude,
+            "longitude": self.longitude,
+            "improvement_value": self.improvement_value,
+            "land_value": self.land_value,
+            "parcel_value": self.parcel_value,
+            "acre": self.acre,
+            "acre_sqft": self.acre_sqft,
+            "building_SQFT": self.building_SQFT,
+            "building_count": self.building_count,
+            "zoning": self.zoning,
+            "county": self.county,
+            "state": self.state,
+            "legal_description": self.legal_description,
+            "fema_flood_zone": self.fema_flood_zone,
+        }

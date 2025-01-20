@@ -239,7 +239,27 @@ def delete_property(parcel_number):
         print(f"Error while deleting the property: {e}")
         return jsonify({"error": f"Error while deleting the property: {str(e)}"}), 500
 
-
+#Get all properties
+@api.route('/properties', methods=['GET'])
+def get_properties():
+    try:
+        properties = Property.query.all()
+        return jsonify([property.serialize() for property in properties]), 200
+    except Exception as e:
+        print(f"Error al obtener los archivos: {e}")
+        return jsonify({"error": f"Error al obtener los archivos: {str(e)}"}), 500
+    
+#Get one by one property
+@api.route('/property/<string:parcel_number>', methods=['GET'])
+def get_property(parcel_number):
+    try:
+        property_data = Property.query.filter_by(parcel_number=parcel_number).first()
+        if not property_data:
+            return jsonify({"error": "Property not found"}), 404
+        return jsonify(property_data.serialize()), 200
+    except Exception as e:
+        print(f"Error al obtener la propiedad: {e}")
+        return jsonify({"error": f"Error al obtener la propiedad: {str(e)}"}), 500
 
 
 #@api.route('/excel', methods=['GET'])

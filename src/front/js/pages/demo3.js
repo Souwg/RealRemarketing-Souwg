@@ -1,16 +1,21 @@
 import React, { useState, useContext } from "react";
+import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
-import * as XLSX from "xlsx";
 import "../../styles/demo3.css";
 import { Context } from "../store/appContext";
 
 export const DemoThree = () => {
   const { actions } = useContext(Context);
+  const navigate = useNavigate();
   const [file, setFile] = useState(null);
   const [parcelDataList, setParcelDataList] = useState([]);
   const [loading, setLoading] = useState(false);
   const [headerName, setHeaderName] = useState("");
   const [isFocused, setIsFocused] = useState(false);
+
+  const handleClick = ()=>{
+    navigate('/demo3/showproperties')
+  }
 
   const headerMapping = {
     parcelnumb: "Parcel Number",
@@ -48,13 +53,7 @@ export const DemoThree = () => {
       const content = await file.text();
       const lines = content.split("\n");
       return lines.map((line) => line.split(","));
-    } else if (fileExtension === "xlsx" || fileExtension === "xls") {
-      const data = await file.arrayBuffer();
-      const workbook = XLSX.read(data, { type: "array" });
-      const sheetName = workbook.SheetNames[0];
-      const worksheet = workbook.Sheets[sheetName];
-      return XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-    } else {
+    }  else {
       throw new Error("Unsupported file type.");
     }
   };
@@ -62,7 +61,7 @@ export const DemoThree = () => {
   const fetchParcelData = async (parcelNumber) => {
     try {
       const response = await fetch(
-        `https://app.regrid.com/api/v2/parcels/apn?parcelnumb=${parcelNumber}&token=eyJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJyZWdyaWQuY29tIiwiaWF0IjoxNzM2NDQzNDU4LCJleHAiOjE3MzkwMzU0NTgsInUiOjQ4MjQxNSwiZyI6MjMxNTMsImNhcCI6InBhOnRzOnBzOmJmOm1hOnR5OmVvOnpvOnNiIn0.GxFicvA7XmyTh2uIIgJ-HwqN1NT3eQ6NArT1KkbrAT4`
+        `https://app.regrid.com/api/v2/parcels/apn?parcelnumb=${parcelNumber}&token=eyJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJyZWdyaWQuY29tIiwiaWF0IjoxNzM3NDA2MzU3LCJleHAiOjE3Mzk5OTgzNTcsInUiOjQ4NjA5NCwiZyI6MjMxNTMsImNhcCI6InBhOnRzOnBzOmJmOm1hOnR5OmVvOnpvOnNiIn0.v3e_UqErozcxQm_1Tsn81KYcUoWQituBYJsO4z3F9c8`
       );
       if (!response.ok)
         throw new Error(`Failed to fetch parcel: ${parcelNumber}`);
@@ -82,33 +81,33 @@ export const DemoThree = () => {
         "",
         "warning"
       );
-
+  
     setLoading(true);
     try {
-      const rows = await parseFileContent(file);
-      const headers = rows[0];
-      const headerIndex = headers.indexOf(headerName.trim());
-
+      const rows = await parseFileContent(file); // Lee el contenido del archivo
+      const headers = rows[0]; // Obtén los encabezados
+      const headerIndex = headers.indexOf(headerName.trim()); // Encuentra el índice del encabezado relevante
+  
       if (headerIndex === -1) {
         setLoading(false);
         return Swal.fire("Header not found in the file.", "", "error");
       }
-
+  
       const parcelNumbers = rows
-        .slice(1)
-        .map((row) => row[headerIndex]?.toString().trim())
-        .filter((num) => /^[0-9]+$/.test(num));
-
+        .slice(1) // Omite el encabezado
+        .map((row) => row[headerIndex]?.toString().trim()) // Extrae los números de parcela
+        .filter((num) => /^[0-9]+$/.test(num)); // Filtra números válidos
+  
       if (!parcelNumbers.length) {
         setLoading(false);
         return Swal.fire("No valid parcel numbers found.", "", "error");
       }
-
-      const parcels = await Promise.all(parcelNumbers.map(fetchParcelData));
-      const validParcels = parcels.filter(Boolean);
-      setParcelDataList(validParcels);
-
-      await actions.uploadParcels(validParcels);
+  
+      const parcels = await Promise.all(parcelNumbers.map(fetchParcelData)); // Fetch de datos de las parcelas
+      const validParcels = parcels.filter(Boolean); // Filtra las parcelas válidas
+      setParcelDataList(validParcels); // Almacena las parcelas en el estado
+  
+      await actions.uploadParcels(validParcels); // Envía al backend
       Swal.fire(
         "File processed successfully!",
         `Fetched data for ${validParcels.length} parcels.`,
@@ -118,10 +117,10 @@ export const DemoThree = () => {
       Swal.fire("Failed to process the file.", error.message, "error");
     } finally {
       setLoading(false);
-      setFile(null); // Reinicia el estado del archivo
+      setFile(null); // Reinicia el archivo
     }
   };
-
+  
   return (
     <div className="upload-and-parcel-container">
       <form onSubmit={handleFileUpload} className="upload-form">
@@ -138,8 +137,8 @@ export const DemoThree = () => {
             <div className="back-side cover"></div>
           </div>
           <label className="custom-file-upload">
-            <input className="title" type="file" onChange={handleFileChange} />
-            {file ? file.name : "Choose a file"}
+            <input className="title" type="file" onChange={handleFileChange}/>
+            {file ? file.name : "Choose a file to add properties"}
           </label>
         </div>
         <div className="d-flex m-auto justify-content-center">
@@ -152,6 +151,7 @@ export const DemoThree = () => {
               onFocus={() => setIsFocused(true)}
               onBlur={() => setIsFocused(false)}
               className="header-input"
+              title="Header column name"
             />
           </div>
           {/*<button type="submit" className="upload-button" disabled={loading}>
@@ -161,10 +161,12 @@ export const DemoThree = () => {
             type="submit"
             className="container-btn-file"
             disabled={loading}
-          >
-            {loading ? "Processing..." : <i class="fa-solid fa-upload"></i>}
-          </button>
+            title="Upload file"
+            >
+            {loading ? "Processing..." : <i className="fa-solid fa-upload"></i>}
+          </button>   
         </div>
+        <button className="go-to-properties" onClick={handleClick} >See all properties</button>
       </form>
       {parcelDataList.length > 0 && (
         <div className="parcel-table-container">
