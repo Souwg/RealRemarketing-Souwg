@@ -132,6 +132,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 			
 			  uploadParcels: async (parcels) => {
 				try {
+					console.log("Parcels enviados al backend:", parcels);
 				  const response = await fetch(backendURL + "uploadproperties", {
 					method: "POST",
 					headers: {
@@ -146,6 +147,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 		
 				  const data = await response.json();
 				  console.log("Upload success:", data);
+				  
 				  return data;
 				} catch (error) {
 				  console.error("Error uploading parcels:", error);
