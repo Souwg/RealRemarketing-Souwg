@@ -13,9 +13,9 @@ export const DemoThree = () => {
   const [headerName, setHeaderName] = useState("");
   const [isFocused, setIsFocused] = useState(false);
 
-  const handleClick = ()=>{
-    navigate('/demo3/showproperties')
-  }
+  const handleClick = () => {
+    navigate("/demo3/showproperties");
+  };
 
   const headerMapping = {
     parcelnumb: "Parcel Number",
@@ -53,7 +53,7 @@ export const DemoThree = () => {
       const content = await file.text();
       const lines = content.split("\n");
       return lines.map((line) => line.split(","));
-    }  else {
+    } else {
       throw new Error("Unsupported file type.");
     }
   };
@@ -81,32 +81,32 @@ export const DemoThree = () => {
         "",
         "warning"
       );
-  
+
     setLoading(true);
     try {
       const rows = await parseFileContent(file); // Lee el contenido del archivo
       const headers = rows[0]; // Obtén los encabezados
       const headerIndex = headers.indexOf(headerName.trim()); // Encuentra el índice del encabezado relevante
-  
+
       if (headerIndex === -1) {
         setLoading(false);
         return Swal.fire("Header not found in the file.", "", "error");
       }
-  
+
       const parcelNumbers = rows
         .slice(1) // Omite el encabezado
         .map((row) => row[headerIndex]?.toString().trim()) // Extrae los números de parcela
         .filter((num) => /^[0-9]+$/.test(num)); // Filtra números válidos
-  
+
       if (!parcelNumbers.length) {
         setLoading(false);
         return Swal.fire("No valid parcel numbers found.", "", "error");
       }
-  
+
       const parcels = await Promise.all(parcelNumbers.map(fetchParcelData)); // Fetch de datos de las parcelas
       const validParcels = parcels.filter(Boolean); // Filtra las parcelas válidas
       setParcelDataList(validParcels); // Almacena las parcelas en el estado
-  
+
       await actions.uploadParcels(validParcels); // Envía al backend
       Swal.fire(
         "File processed successfully!",
@@ -120,7 +120,7 @@ export const DemoThree = () => {
       setFile(null); // Reinicia el archivo
     }
   };
-  
+
   return (
     <div className="upload-and-parcel-container">
       <form onSubmit={handleFileUpload} className="upload-form">
@@ -137,7 +137,7 @@ export const DemoThree = () => {
             <div className="back-side cover"></div>
           </div>
           <label className="custom-file-upload">
-            <input className="title" type="file" onChange={handleFileChange}/>
+            <input className="title" type="file" onChange={handleFileChange} />
             {file ? file.name : "Choose a file to add properties"}
           </label>
         </div>
@@ -162,11 +162,17 @@ export const DemoThree = () => {
             className="container-btn-file"
             disabled={loading}
             title="Upload file"
-            >
+          >
             {loading ? "Processing..." : <i className="fa-solid fa-upload"></i>}
-          </button>   
+          </button>
         </div>
-        <button className="go-to-properties" onClick={handleClick} >See all properties</button>
+        <button onClick={handleClick} className="button-go">
+          See all properties
+          <ion-icon
+            name="arrow-forward-outline"
+            style={{ fontSize: "40px", verticalAlign: "middle" }}
+          ></ion-icon>
+        </button>
       </form>
       {parcelDataList.length > 0 && (
         <div className="parcel-table-container">

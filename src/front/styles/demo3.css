@@ -304,3 +304,33 @@
   font-size: 20px;
   margin-bottom: 10px;
 }
+
+/*button go to all properties*/
+.button-go {
+  position: fixed;
+  bottom: 20px; /* Distancia desde la parte inferior */
+  right: 20px; /* Distancia desde la parte derecha */
+  border: none;
+  background-color: seagreen;
+  color: white;
+  font-size: 1.15rem;
+  font-weight: 500;
+  padding: 0.7rem 1.3rem;
+  border-radius: 1.2rem;
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+  cursor: pointer;
+  transform: translate(1) translate(0, 0);
+  transition: transform 225ms, box-shadow 225ms;
+  z-index: 1000; /* Asegura que esté por encima de otros elementos */
+}
+
+.button-go:hover {
+  transform: scale(1.05) translate(0, -0.15rem);
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.35);
+}
+
+.button-go:active {
+  transform: scale(1) translate(0, 0.15rem);
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
