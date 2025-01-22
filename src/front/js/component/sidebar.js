@@ -28,7 +28,7 @@ const Sidebar = () => {
       >
         <ul className="nav__list">
           {[
-            { to: "/", icon: "home-outline" },
+            { to: "/", icon: "home-outline"},
             { to: "/login", icon: "person-outline" },
             { to: "/demo1", icon: "bug-outline" },
             { to: "/demo2", icon: "pizza-outline" },

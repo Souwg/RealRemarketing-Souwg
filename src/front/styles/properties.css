@@ -126,9 +126,9 @@ button {
   color: white; /* Texto en blanco */
   font-size: 0.8rem; /* Tamaño de la fuente */
   font-weight: 400; /* Peso de la fuente */
-  padding: 6px 18px; /* Relleno interno del botón */
+  padding: 0px 18px; /* Relleno interno del botón */
   border: none; /* Sin borde */
-  border-radius: 80px; /* Bordes redondeados */
+  border-radius: 0; /* Bordes redondeados */
   cursor: pointer; /* Cursor tipo puntero */
   transition: all 0.3s ease; /* Transición suave */
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Sombra ligera */
