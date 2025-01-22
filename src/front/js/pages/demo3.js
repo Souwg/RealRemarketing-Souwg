@@ -13,7 +13,7 @@ export const DemoThree = () => {
   const [headerName, setHeaderName] = useState("");
   const [isFocused, setIsFocused] = useState(false);
 
-  const handleClick = () => {
+  const handleClickProperties = () => {
     navigate("/demo3/showproperties");
   };
 
@@ -159,14 +159,14 @@ export const DemoThree = () => {
         </button>*/}
           <button
             type="submit"
-            className="container-btn-file"
+            className="container-btn-file-upload"
             disabled={loading}
             title="Upload file"
           >
             {loading ? "Processing..." : <i className="fa-solid fa-upload"></i>}
           </button>
         </div>
-        <button onClick={handleClick} className="button-go">
+        <button onClick={handleClickProperties} className="button-go">
           See all properties
           <ion-icon
             name="arrow-forward-outline"

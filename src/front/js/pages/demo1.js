@@ -1,3 +1,4 @@
+/*
 import React, { useState, useContext, useEffect } from "react";
 import { Context } from "../store/appContext";
 import Swal from "sweetalert2";
@@ -103,7 +104,6 @@ export const DemoOne = () => {
               onMouseEnter={() => setMenuOpen(true)}
               onMouseLeave={() => setMenuOpen(false)}
             >
-              ⋮ {/* Cambiado a tres puntos verticales */}
             </button>
             {menuOpen && (
               <div
@@ -163,3 +163,4 @@ export const DemoOne = () => {
     </div>
   );
 };
+*/

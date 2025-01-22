@@ -4,12 +4,12 @@ import ScrollToTop from "./component/scrollToTop";
 import { BackendURL } from "./component/backendURL";
 
 import { Home } from "./pages/home";
-import { DemoOne} from "./pages/demo1";
+//import { DemoOne} from "./pages/demo1";*/
 import { DemoTwo } from "./pages/demo2";
 import { DemoThree } from "./pages/demo3";
 import { ShowProperties } from "./pages/properties"
 import { Register } from "./pages/register";
-import { Login } from "./pages/login";
+//import { Login } from "./pages/login";
 import { User } from "./pages/user";
 
 
@@ -34,11 +34,11 @@ const Layout = () => {
           <Navbar /> 
           <Routes>
             <Route element={<Home />} path="/" />
-            <Route element={<DemoOne />} path="/demo1" />
+            {/*<Route element={<DemoOne />} path="/demo1" />*/}
             <Route element={<DemoTwo />} path="/demo2" />
             <Route element={<DemoThree />} path="/demo3" />
             <Route element={<ShowProperties/>} path="/demo3/showproperties"/>
-            <Route element={<Login />} path="/login" />
+            {/*<Route element={<Login />} path="/login" />*/}
             <Route element={<Register />} path="/register" />
             <Route element={<User />} path="/user" />
             <Route element={<h1>Not found!</h1>} />
