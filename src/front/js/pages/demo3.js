@@ -84,30 +84,41 @@ export const DemoThree = () => {
 
     setLoading(true);
     try {
-      const rows = await parseFileContent(file); // Lee el contenido del archivo
-      const headers = rows[0]; // Obtén los encabezados
-      const headerIndex = headers.indexOf(headerName.trim()); // Encuentra el índice del encabezado relevante
+      const rows = await parseFileContent(file); // Leer el contenido del archivo
+      const headers = rows[0].map((header) => header.trim()); // Limpiar encabezados
 
+      // Buscar el índice del encabezado relevante
+      const headerIndex = headers.indexOf(headerName.trim());
       if (headerIndex === -1) {
-        setLoading(false);
-        return Swal.fire("Header not found in the file.", "", "error");
+        return Swal.fire(
+          "Header not found in the file.",
+          "Ensure you spelled the header name correctly.",
+          "error"
+        );
       }
 
+      // Extraer y limpiar números de parcela
       const parcelNumbers = rows
-        .slice(1) // Omite el encabezado
-        .map((row) => row[headerIndex]?.toString().trim()) // Extrae los números de parcela
-        .filter((num) => /^[0-9]+$/.test(num)); // Filtra números válidos
+        .slice(1) // Omitir el encabezado
+        .map((row) => row[headerIndex]?.toString().trim()) // Obtener valores de la columna
+        .filter((num) => num); // Eliminar valores vacíos //ESTO AQUI FUE LO ULTIMO QUE SE MODIFICO!!!!!!!!
 
-      if (!parcelNumbers.length) {
+      console.log("Raw Parcel Numbers:", parcelNumbers); // Inspeccionar valores extraídos
+
+      if (parcelNumbers.length === 0) {
         setLoading(false);
-        return Swal.fire("No valid parcel numbers found.", "", "error");
+        return Swal.fire(
+          "No valid parcel numbers found.",
+          `The column "${headerName}" exists, but contains no valid parcel numbers.`,
+          "info"
+        );
       }
 
       const parcels = await Promise.all(parcelNumbers.map(fetchParcelData)); // Fetch de datos de las parcelas
-      const validParcels = parcels.filter(Boolean); // Filtra las parcelas válidas
-      setParcelDataList(validParcels); // Almacena las parcelas en el estado
+      const validParcels = parcels.filter(Boolean); // Filtrar datos válidos
+      setParcelDataList(validParcels); // Almacenar en el estado
 
-      await actions.uploadParcels(validParcels); // Envía al backend
+      await actions.uploadParcels(validParcels); // Enviar al backend
       Swal.fire(
         "File processed successfully!",
         `Fetched data for ${validParcels.length} parcels.`,
@@ -117,9 +128,10 @@ export const DemoThree = () => {
       Swal.fire("Failed to process the file.", error.message, "error");
     } finally {
       setLoading(false);
-      setFile(null); // Reinicia el archivo
+      setFile(null); // Reiniciar el archivo
     }
   };
+  
 
   return (
     <div className="upload-and-parcel-container">
