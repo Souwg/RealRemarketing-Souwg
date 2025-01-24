@@ -10,12 +10,6 @@ export const DemoThree = () => {
   const [file, setFile] = useState(null);
   const [parcelDataList, setParcelDataList] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [headerName, setHeaderName] = useState("");
-  const [isFocused, setIsFocused] = useState(false);
-
-  const handleClick = () => {
-    navigate("/demo3/showproperties");
-  };
 
   const headerMapping = {
     parcelnumb: "Parcel Number",
@@ -44,8 +38,6 @@ export const DemoThree = () => {
     ll_gissqft: "Acre SQFT",
   };
 
-  const handleFileChange = (event) => setFile(event.target.files[0]);
-
   const parseFileContent = async (file) => {
     const fileExtension = file.name.split(".").pop().toLowerCase();
 
@@ -58,76 +50,166 @@ export const DemoThree = () => {
     }
   };
 
-  const fetchParcelData = async (parcelNumber) => {
+  const validateFileContent = (rows) => {
+    if (!rows || rows.length < 2) {
+      throw new Error("The file is empty or improperly formatted.");
+    }
+    return true;
+  };
+
+  const fetchParcelByNumber = async (parcelNumber) => {
     try {
       const response = await fetch(
-        `https://app.regrid.com/api/v2/parcels/apn?parcelnumb=${parcelNumber}&token=eyJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJyZWdyaWQuY29tIiwiaWF0IjoxNzM3NDA2MzU3LCJleHAiOjE3Mzk5OTgzNTcsInUiOjQ4NjA5NCwiZyI6MjMxNTMsImNhcCI6InBhOnRzOnBzOmJmOm1hOnR5OmVvOnpvOnNiIn0.v3e_UqErozcxQm_1Tsn81KYcUoWQituBYJsO4z3F9c8`
+        `https://app.regrid.com/api/v2/parcels/apn?parcelnumb=${parcelNumber}&token=eyJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJyZWdyaWQuY29tIiwiaWF0IjoxNzM3Njg5MDUwLCJleHAiOjE3NDAyODEwNTAsInUiOjQ4NzI5MCwiZyI6MjMxNTMsImNhcCI6InBhOnRzOnBzOmJmOm1hOnR5OmVvOnpvOnNiIn0.LCESilMr2HeYDj4ki5nNVSAQ5rqYobOkkTj5WS8ZQ_c`
       );
-      if (!response.ok)
-        throw new Error(`Failed to fetch parcel: ${parcelNumber}`);
+      if (!response.ok) throw new Error(`Failed to fetch parcel: ${parcelNumber}`);
       const data = await response.json();
       return data.parcels?.features[0] || null;
-    } catch {
+    } catch (error) {
+      console.error(error);
       return null;
     }
   };
 
+  const fetchParcelByAddress = async (address) => {
+    try {
+      const response = await fetch(
+        `https://app.regrid.com/api/v2/parcels/address?query=${encodeURIComponent(
+          address
+        )}&token=eyJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJyZWdyaWQuY29tIiwiaWF0IjoxNzM3Njg5MDUwLCJleHAiOjE3NDAyODEwNTAsInUiOjQ4NzI5MCwiZyI6MjMxNTMsImNhcCI6InBhOnRzOnBzOmJmOm1hOnR5OmVvOnpvOnNiIn0.LCESilMr2HeYDj4ki5nNVSAQ5rqYobOkkTj5WS8ZQ_c`
+      );
+      if (!response.ok) throw new Error(`Failed to fetch parcel by address: ${address}`);
+      const data = await response.json();
+      return data.parcels?.features[0] || null;
+    } catch (error) {
+      console.error(error);
+      return null;
+    }
+  };
+
+  const fetchParcelByLatLon = async (latitude, longitude) => {
+    try {
+      const response = await fetch(
+        `https://app.regrid.com/api/v2/parcels/coordinates?lat=${latitude}&lon=${longitude}&token=YOUR_API_TOKEN`
+      );
+      if (!response.ok) throw new Error(`Failed to fetch parcel at coordinates (${latitude}, ${longitude})`);
+      const data = await response.json();
+      return data.parcels?.features[0] || null;
+    } catch (error) {
+      console.error(error);
+      return null;
+    }
+  };
+
+  const handleFileChange = (event) => {
+    const selectedFile = event.target.files[0];
+    setFile(selectedFile);
+  };
+  
   const handleFileUpload = async (event) => {
     event.preventDefault();
     if (!file) return Swal.fire("Please select a file.", "", "warning");
-    if (!headerName)
-      return Swal.fire(
-        "Please specify the column header for parcel numbers.",
-        "",
-        "warning"
-      );
-
+  
     setLoading(true);
     try {
-      const rows = await parseFileContent(file); // Lee el contenido del archivo
-      const headers = rows[0]; // Obtén los encabezados
-      const headerIndex = headers.indexOf(headerName.trim()); // Encuentra el índice del encabezado relevante
-
-      if (headerIndex === -1) {
+      const rows = await parseFileContent(file);
+      validateFileContent(rows);
+  
+      const headers = rows[0].map((header) => (header ? header.trim().toLowerCase() : ""));
+      console.log("File Headers:", headers);
+  
+      const dataRows = rows.slice(1);
+  
+      const parcels = await Promise.all(
+        dataRows.map(async (row, rowIndex) => {
+          let parcelNumber = null;
+          let address = null;
+          let latitude = null;
+          let longitude = null;
+  
+          row.forEach((cell, columnIndex) => {
+            const value = cell?.trim();
+            console.log(`Row ${rowIndex + 1}, Column ${columnIndex}: ${value}`);
+            if (!value) return;
+  
+            if (/^[a-zA-Z0-9-()_\s]+$/.test(value) && !parcelNumber) {
+              parcelNumber = value;
+            }
+  
+            if (headers[columnIndex]?.includes("address") && !address) {
+              address = value;
+            }
+  
+            if (/^-?\d+(\.\d+)?$/.test(value)) {
+              if (!latitude && value >= -90 && value <= 90) {
+                latitude = value;
+              } else if (!longitude && value >= -180 && value <= 180) {
+                longitude = value;
+              }
+            }
+          });
+  
+          console.log(`Row ${rowIndex + 1} - Parsed Data:`, {
+            parcelNumber,
+            address,
+            latitude,
+            longitude,
+          });
+  
+          if (parcelNumber) {
+            const parcel = await fetchParcelByNumber(parcelNumber);
+            if (parcel) return parcel;
+          }
+          if (latitude && longitude) {
+            const parcel = await fetchParcelByLatLon(latitude, longitude);
+            if (parcel) return parcel;
+          }
+          if (address) {
+            const parcel = await fetchParcelByAddress(address);
+            if (parcel) return parcel;
+          }
+  
+          console.warn(`No valid parcel data found for row ${rowIndex + 1}`);
+          return null;
+        })
+      );
+  
+      const validParcels = parcels.filter(Boolean);
+      console.log("Valid Parcels:", validParcels);
+  
+      if (validParcels.length === 0) {
         setLoading(false);
-        return Swal.fire("Header not found in the file.", "", "error");
+        return Swal.fire(
+          "No valid parcels found.",
+          "The file does not contain valid parcel data.",
+          "info"
+        );
       }
-
-      const parcelNumbers = rows
-        .slice(1) // Omite el encabezado
-        .map((row) => row[headerIndex]?.toString().trim()) // Extrae los números de parcela
-        .filter((num) => /^[0-9]+$/.test(num)); // Filtra números válidos
-
-      if (!parcelNumbers.length) {
-        setLoading(false);
-        return Swal.fire("No valid parcel numbers found.", "", "error");
-      }
-
-      const parcels = await Promise.all(parcelNumbers.map(fetchParcelData)); // Fetch de datos de las parcelas
-      const validParcels = parcels.filter(Boolean); // Filtra las parcelas válidas
-      setParcelDataList(validParcels); // Almacena las parcelas en el estado
-
-      await actions.uploadParcels(validParcels); // Envía al backend
+  
+      setParcelDataList(validParcels);
+      await actions.uploadParcels(validParcels);
       Swal.fire(
         "File processed successfully!",
         `Fetched data for ${validParcels.length} parcels.`,
         "success"
       );
     } catch (error) {
+      console.error("Error during processing:", error);
       Swal.fire("Failed to process the file.", error.message, "error");
     } finally {
       setLoading(false);
-      setFile(null); // Reinicia el archivo
+  
+      // Reiniciar estados relevantes
+      setFile(null);
+      document.querySelector('input[type="file"]').value = ""; // Resetear input
     }
   };
+  
+  
 
   return (
     <div className="upload-and-parcel-container">
       <form onSubmit={handleFileUpload} className="upload-form">
-        {/*<div className="file-input-container">
-          <input type="file" onChange={handleFileChange} className="file-input" />
-          <label className="file-label">{file ? file.name : "Click to browse a file"}</label>
-        </div>*/}
         <div className="container">
           <div className="folder">
             <div className="front-side">
@@ -142,31 +224,19 @@ export const DemoThree = () => {
           </label>
         </div>
         <div className="d-flex m-auto justify-content-center">
-          <div className="header-input-container">
-            <input
-              type="text"
-              placeholder={isFocused ? "" : "Parcel header"}
-              value={headerName}
-              onChange={(e) => setHeaderName(e.target.value)}
-              onFocus={() => setIsFocused(true)}
-              onBlur={() => setIsFocused(false)}
-              className="header-input"
-              title="Header column name"
-            />
-          </div>
-          {/*<button type="submit" className="upload-button" disabled={loading}>
-          {loading ? "Processing..." : "Upload and Fetch"}
-        </button>*/}
           <button
             type="submit"
-            className="container-btn-file"
+            className="container-btn-file-upload"
             disabled={loading}
             title="Upload file"
           >
             {loading ? "Processing..." : <i className="fa-solid fa-upload"></i>}
           </button>
         </div>
-        <button onClick={handleClick} className="button-go">
+        <button
+          onClick={() => navigate("/demo3/showproperties")}
+          className="button-go"
+        >
           See all properties
           <ion-icon
             name="arrow-forward-outline"
@@ -180,45 +250,19 @@ export const DemoThree = () => {
           <table className="parcel-table">
             <thead>
               <tr>
-                {Object.keys(headerMapping).map((key) => (
-                  <th key={key}>{headerMapping[key]}</th>
+                {Object.values(headerMapping).map((header) => (
+                  <th key={header}>{header}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
               {parcelDataList.map((parcel, index) => (
                 <tr key={index}>
-                  {Object.keys(headerMapping).map((key) => {
-                    const value = parcel.properties.fields[key] || "N/A";
-
-                    // Detecta si la celda es latitud o longitud
-                    if (key === "lat" || key === "lon") {
-                      const lat = parcel.properties.fields.lat;
-                      const lon = parcel.properties.fields.lon;
-
-                      // Verifica que ambos valores existan para crear el enlace
-                      if (lat && lon) {
-                        return (
-                          <td key={key}>
-                            <a
-                              href={`https://www.google.com/maps?q=${lat},${lon}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              style={{
-                                color: "blue",
-                                textDecoration: "none",
-                              }}
-                            >
-                              {value}
-                            </a>
-                          </td>
-                        );
-                      }
-                    }
-
-                    // Renderiza las demás celdas normales
-                    return <td key={key}>{value}</td>;
-                  })}
+                  {Object.keys(headerMapping).map((key) => (
+                    <td key={key}>
+                      {parcel.properties.fields[key] || "N/A"}
+                    </td>
+                  ))}
                 </tr>
               ))}
             </tbody>

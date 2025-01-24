@@ -13,7 +13,7 @@
   background: linear-gradient(135deg, #6dd5ed, #2193b0);
   border-radius: 15px;
   box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
-  width: 40%;
+  width: 30%;
   margin-top: 2rem;
   height: calc(var(--folder-H) * 2);
   position: relative;
@@ -214,7 +214,7 @@
 }*/
 
 /*upload button*/
-.container-btn-file {
+.container-btn-file-upload {
   display: flex;
   position: relative;
   margin-top: 1em;
@@ -231,7 +231,7 @@
   box-shadow: 4px 8px 10px -3px rgba(0, 0, 0, 0.356);
   transition: all 250ms;
 }
-.container-btn-file input[type="file"] {
+.container-btn-file-upload input[type="file"] {
   position: absolute;
   width: 100%;
   height: 100%;
@@ -239,7 +239,7 @@
   cursor: pointer;
 }
 
-.container-btn-file::before {
+.container-btn-file-upload::before {
   content: "";
   position: absolute;
   height: 100%;
@@ -290,6 +290,8 @@
   padding: 8px;
   text-align: left;
   white-space: nowrap; /* Evita que el texto se ajuste a varias líneas */
+  height: 50px; /* Altura consistente para cada celda */
+  line-height: 50px; /* Centra el texto verticalmente */
 }
 
 .parcel-table th {
@@ -304,6 +306,7 @@
   font-size: 20px;
   margin-bottom: 10px;
 }
+
 
 /*button go to all properties*/
 .button-go {
