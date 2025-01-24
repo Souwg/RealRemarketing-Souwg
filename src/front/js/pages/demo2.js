@@ -108,7 +108,7 @@ export const DemoTwo = () => {
 
     try {
       const response = await fetch(
-        `https://app.regrid.com/api/v2/parcels/apn?parcelnumb=${parcelNumber}&token=eyJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJyZWdyaWQuY29tIiwiaWF0IjoxNzM3NDA2MzU3LCJleHAiOjE3Mzk5OTgzNTcsInUiOjQ4NjA5NCwiZyI6MjMxNTMsImNhcCI6InBhOnRzOnBzOmJmOm1hOnR5OmVvOnpvOnNiIn0.v3e_UqErozcxQm_1Tsn81KYcUoWQituBYJsO4z3F9c8`
+        `https://app.regrid.com/api/v2/parcels/apn?parcelnumb=${parcelNumber}&token=eyJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJyZWdyaWQuY29tIiwiaWF0IjoxNzM3Njg5MDUwLCJleHAiOjE3NDAyODEwNTAsInUiOjQ4NzI5MCwiZyI6MjMxNTMsImNhcCI6InBhOnRzOnBzOmJmOm1hOnR5OmVvOnpvOnNiIn0.LCESilMr2HeYDj4ki5nNVSAQ5rqYobOkkTj5WS8ZQ_c`
       );
 
       if (!response.ok) {

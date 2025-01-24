@@ -38,8 +38,6 @@ export const DemoThree = () => {
     ll_gissqft: "Acre SQFT",
   };
 
-  const handleFileChange = (event) => setFile(event.target.files[0]);
-
   const parseFileContent = async (file) => {
     const fileExtension = file.name.split(".").pop().toLowerCase();
 
@@ -52,15 +50,23 @@ export const DemoThree = () => {
     }
   };
 
+  const validateFileContent = (rows) => {
+    if (!rows || rows.length < 2) {
+      throw new Error("The file is empty or improperly formatted.");
+    }
+    return true;
+  };
+
   const fetchParcelByNumber = async (parcelNumber) => {
     try {
       const response = await fetch(
-        `https://app.regrid.com/api/v2/parcels/apn?parcelnumb=${parcelNumber}&token=eyJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJyZWdyaWQuY29tIiwiaWF0IjoxNzM3NDA2MzU3LCJleHAiOjE3Mzk5OTgzNTcsInUiOjQ4NjA5NCwiZyI6MjMxNTMsImNhcCI6InBhOnRzOnBzOmJmOm1hOnR5OmVvOnpvOnNiIn0.v3e_UqErozcxQm_1Tsn81KYcUoWQituBYJsO4z3F9c8`
+        `https://app.regrid.com/api/v2/parcels/apn?parcelnumb=${parcelNumber}&token=eyJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJyZWdyaWQuY29tIiwiaWF0IjoxNzM3Njg5MDUwLCJleHAiOjE3NDAyODEwNTAsInUiOjQ4NzI5MCwiZyI6MjMxNTMsImNhcCI6InBhOnRzOnBzOmJmOm1hOnR5OmVvOnpvOnNiIn0.LCESilMr2HeYDj4ki5nNVSAQ5rqYobOkkTj5WS8ZQ_c`
       );
       if (!response.ok) throw new Error(`Failed to fetch parcel: ${parcelNumber}`);
       const data = await response.json();
       return data.parcels?.features[0] || null;
-    } catch {
+    } catch (error) {
+      console.error(error);
       return null;
     }
   };
@@ -70,16 +76,36 @@ export const DemoThree = () => {
       const response = await fetch(
         `https://app.regrid.com/api/v2/parcels/address?query=${encodeURIComponent(
           address
-        )}&token=eyJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJyZWdyaWQuY29tIiwiaWF0IjoxNzM3NDA2MzU3LCJleHAiOjE3Mzk5OTgzNTcsInUiOjQ4NjA5NCwiZyI6MjMxNTMsImNhcCI6InBhOnRzOnBzOmJmOm1hOnR5OmVvOnpvOnNiIn0.v3e_UqErozcxQm_1Tsn81KYcUoWQituBYJsO4z3F9c8`
+        )}&token=eyJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJyZWdyaWQuY29tIiwiaWF0IjoxNzM3Njg5MDUwLCJleHAiOjE3NDAyODEwNTAsInUiOjQ4NzI5MCwiZyI6MjMxNTMsImNhcCI6InBhOnRzOnBzOmJmOm1hOnR5OmVvOnpvOnNiIn0.LCESilMr2HeYDj4ki5nNVSAQ5rqYobOkkTj5WS8ZQ_c`
       );
       if (!response.ok) throw new Error(`Failed to fetch parcel by address: ${address}`);
       const data = await response.json();
       return data.parcels?.features[0] || null;
-    } catch {
+    } catch (error) {
+      console.error(error);
       return null;
     }
   };
 
+  const fetchParcelByLatLon = async (latitude, longitude) => {
+    try {
+      const response = await fetch(
+        `https://app.regrid.com/api/v2/parcels/coordinates?lat=${latitude}&lon=${longitude}&token=YOUR_API_TOKEN`
+      );
+      if (!response.ok) throw new Error(`Failed to fetch parcel at coordinates (${latitude}, ${longitude})`);
+      const data = await response.json();
+      return data.parcels?.features[0] || null;
+    } catch (error) {
+      console.error(error);
+      return null;
+    }
+  };
+
+  const handleFileChange = (event) => {
+    const selectedFile = event.target.files[0];
+    setFile(selectedFile);
+  };
+  
   const handleFileUpload = async (event) => {
     event.preventDefault();
     if (!file) return Swal.fire("Please select a file.", "", "warning");
@@ -87,74 +113,71 @@ export const DemoThree = () => {
     setLoading(true);
     try {
       const rows = await parseFileContent(file);
-  
-      if (rows.length < 2) {
-        throw new Error("The file is empty or has no data rows.");
-      }
+      validateFileContent(rows);
   
       const headers = rows[0].map((header) => (header ? header.trim().toLowerCase() : ""));
-      const dataRows = rows.slice(1); // Filas de datos
+      console.log("File Headers:", headers);
   
-      let ignoredParcels = []; // Registro de parcelas ignoradas
-      let parcels = [];
+      const dataRows = rows.slice(1);
   
-      for (let rowIndex = 0; rowIndex < dataRows.length; rowIndex++) {
-        const row = dataRows[rowIndex];
-        let parcelNumber = null;
-        let address = null;
-        let latitude = null;
-        let longitude = null;
+      const parcels = await Promise.all(
+        dataRows.map(async (row, rowIndex) => {
+          let parcelNumber = null;
+          let address = null;
+          let latitude = null;
+          let longitude = null;
   
-        row.forEach((cell, columnIndex) => {
-          const value = cell?.trim();
-          if (!value) return;
+          row.forEach((cell, columnIndex) => {
+            const value = cell?.trim();
+            console.log(`Row ${rowIndex + 1}, Column ${columnIndex}: ${value}`);
+            if (!value) return;
   
-          // Detectar número de parcela (más permisivo)
-          if (!parcelNumber && /^[a-zA-Z0-9-()_\s]*$/.test(value)) {
-            parcelNumber = value.trim();
+            if (/^[a-zA-Z0-9-()_\s]+$/.test(value) && !parcelNumber) {
+              parcelNumber = value;
+            }
+  
+            if (headers[columnIndex]?.includes("address") && !address) {
+              address = value;
+            }
+  
+            if (/^-?\d+(\.\d+)?$/.test(value)) {
+              if (!latitude && value >= -90 && value <= 90) {
+                latitude = value;
+              } else if (!longitude && value >= -180 && value <= 180) {
+                longitude = value;
+              }
+            }
+          });
+  
+          console.log(`Row ${rowIndex + 1} - Parsed Data:`, {
+            parcelNumber,
+            address,
+            latitude,
+            longitude,
+          });
+  
+          if (parcelNumber) {
+            const parcel = await fetchParcelByNumber(parcelNumber);
+            if (parcel) return parcel;
+          }
+          if (latitude && longitude) {
+            const parcel = await fetchParcelByLatLon(latitude, longitude);
+            if (parcel) return parcel;
+          }
+          if (address) {
+            const parcel = await fetchParcelByAddress(address);
+            if (parcel) return parcel;
           }
   
-          // Detectar dirección (basado en encabezados)
-          if (!address && headers[columnIndex]?.includes("address")) {
-            address = value.trim();
-          }
-  
-          // Detectar latitud y longitud
-          if (/^-?\d+(\.\d+)?$/.test(value)) {
-            if (!latitude && value >= -90 && value <= 90) latitude = parseFloat(value);
-            else if (!longitude && value >= -180 && value <= 180) longitude = parseFloat(value);
-          }
-        });
-  
-        // Prioridad de búsqueda: Parcel Number -> Lat/Lon -> Address
-        let parcel = null;
-        if (parcelNumber) {
-          console.log(`Row ${rowIndex + 1}: Searching by Parcel Number: ${parcelNumber}`);
-          parcel = await fetchParcelByNumber(parcelNumber);
-        }
-  
-        if (!parcel && latitude && longitude) {
-          console.log(`Row ${rowIndex + 1}: Searching by Lat/Lon: ${latitude}, ${longitude}`);
-          parcel = await fetchParcelByLatLon(latitude, longitude);
-        }
-  
-        if (!parcel && address) {
-          console.log(`Row ${rowIndex + 1}: Searching by Address: ${address}`);
-          parcel = await fetchParcelByAddress(address);
-        }
-  
-        if (parcel) {
-          parcels.push(parcel);
-        } else {
-          console.warn(`Row ${rowIndex + 1}: No valid data found.`);
-          ignoredParcels.push({ rowIndex: rowIndex + 1, parcelNumber, latitude, longitude, address });
-        }
-      }
+          console.warn(`No valid parcel data found for row ${rowIndex + 1}`);
+          return null;
+        })
+      );
   
       const validParcels = parcels.filter(Boolean);
+      console.log("Valid Parcels:", validParcels);
   
       if (validParcels.length === 0) {
-        console.warn("Ignored Parcels:", ignoredParcels);
         setLoading(false);
         return Swal.fire(
           "No valid parcels found.",
@@ -163,7 +186,6 @@ export const DemoThree = () => {
         );
       }
   
-      console.log("Ignored Parcels:", ignoredParcels);
       setParcelDataList(validParcels);
       await actions.uploadParcels(validParcels);
       Swal.fire(
@@ -176,9 +198,13 @@ export const DemoThree = () => {
       Swal.fire("Failed to process the file.", error.message, "error");
     } finally {
       setLoading(false);
-      setFile(null); // Reiniciar el archivo
+  
+      // Reiniciar estados relevantes
+      setFile(null);
+      document.querySelector('input[type="file"]').value = ""; // Resetear input
     }
   };
+  
   
 
   return (
