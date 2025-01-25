@@ -132,20 +132,21 @@ export const DemoThree = () => {
             console.log(`Row ${rowIndex + 1}, Column ${columnIndex}: ${value}`);
             if (!value) return;
   
-            if (/^[a-zA-Z0-9-()_\s]+$/.test(value) && !parcelNumber) {
-              parcelNumber = value;
+            // Aceptar cualquier tipo de texto para el número de parcela
+            if (!parcelNumber) {
+              parcelNumber = value; // No restricciones, cualquier texto es válido
             }
   
+            // Aceptar cualquier dirección que esté en el encabezado address
             if (headers[columnIndex]?.includes("address") && !address) {
-              address = value;
+              address = value; // No restricciones, cualquier texto es válido
             }
   
-            if (/^-?\d+(\.\d+)?$/.test(value)) {
-              if (!latitude && value >= -90 && value <= 90) {
-                latitude = value;
-              } else if (!longitude && value >= -180 && value <= 180) {
-                longitude = value;
-              }
+            // Aceptar cualquier valor numérico o flotante para latitud y longitud
+            if (!latitude && !isNaN(value) && value >= -90 && value <= 90) {
+              latitude = parseFloat(value);
+            } else if (!longitude && !isNaN(value) && value >= -180 && value <= 180) {
+              longitude = parseFloat(value);
             }
           });
   
@@ -156,6 +157,7 @@ export const DemoThree = () => {
             longitude,
           });
   
+          // Intentar buscar datos con cualquier dato disponible
           if (parcelNumber) {
             const parcel = await fetchParcelByNumber(parcelNumber);
             if (parcel) return parcel;
@@ -198,14 +200,11 @@ export const DemoThree = () => {
       Swal.fire("Failed to process the file.", error.message, "error");
     } finally {
       setLoading(false);
-  
-      // Reiniciar estados relevantes
       setFile(null);
       document.querySelector('input[type="file"]').value = ""; // Resetear input
     }
   };
-  
-  
+
 
   return (
     <div className="upload-and-parcel-container">
