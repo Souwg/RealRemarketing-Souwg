@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
+import { Context } from "../store/appContext";
 
 export const EditProperties = () => {
   const [properties, setProperties] = useState([]); // Lista de propiedades

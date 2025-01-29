@@ -8,6 +8,16 @@ export const ShowProperties = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedProperty, setSelectedProperty] = useState(null);
 
+  const openMapModal = (property) => {
+    setSelectedProperty(property);
+    setIsModalOpen(true);
+  };
+
+  const closeMapModal = () => {
+    setIsModalOpen(false);
+    setSelectedProperty(null);
+  };
+
   useEffect(() => {
     const fetchProperties = async () => {
       try {

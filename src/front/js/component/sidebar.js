@@ -30,9 +30,9 @@ const Sidebar = () => {
           {[
             { to: "/", icon: "home-outline" },
             { to: "/login", icon: "person-outline" },
-            { to: "/editproperties", icon: "bug-outline" },
-            { to: "/demo2", icon: "pizza-outline" },
+            { to: "/editproperties", icon: "create-outline" },
             { to: "/demo3", icon: "extension-puzzle-outline" },
+            { to: "/demo2", icon: "pizza-outline" },
           ].map((item, index) => (
             <li key={index} className="nav__item">
               <Link to={item.to} className="nav_link">
