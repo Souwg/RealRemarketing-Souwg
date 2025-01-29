@@ -1,6 +1,9 @@
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.dialects.postgresql import JSON
+from sqlalchemy import JSON  # Importar JSON genérico (compatible con más bases de datos)
 
 db = SQLAlchemy()
+
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -54,57 +57,62 @@ class Files(db.Model):
         }
     
 class Property(db.Model):
+    __tablename__ = "properties"
     id = db.Column(db.Integer, primary_key=True)
-    parcel_number = db.Column(db.String(50), nullable=False)
-    owner = db.Column(db.String(120), nullable=True)
-    year_built = db.Column(db.Integer, nullable=True)
-    building_SQFT = db.Column(db.String(100), nullable=True)
-    building_count = db.Column(db.String(50), nullable=True)
-    acre = db.Column(db.Float, nullable=True)
-    acre_sqft = db.Column(db.Float, nullable=True)
-    address = db.Column(db.String(200), nullable=True)
-    mail_address = db.Column(db.String(200), nullable=True)
-    mail_city = db.Column(db.String(50), nullable=True)
-    mail_state = db.Column(db.String(50), nullable=True)
-    mail_zip = db.Column(db.String(20), nullable=True)
-    mail_country = db.Column(db.String(50), nullable=True)
-    latitude = db.Column(db.Float, nullable=True)
-    longitude = db.Column(db.Float, nullable=True)
-    zip_code = db.Column(db.String(50), nullable=True)
-    improvement_value = db.Column(db.Float, nullable=True)
-    land_value = db.Column(db.Float, nullable=True)
-    parcel_value = db.Column(db.Float, nullable=True)
-    zoning = db.Column(db.String(50), nullable=True)
-    county = db.Column(db.String(50), nullable=True)
-    state = db.Column(db.String(50), nullable=True)
-    legal_description = db.Column(db.String(180), nullable=True)
-    fema_flood_zone = db.Column(db.JSON, nullable=True)
-
+    dynamic_fields = db.Column(JSON) 
+    parcel_number = db.Column(db.String, unique=True, nullable=False)
+    owner = db.Column(db.String)
+    zoning = db.Column(db.String)
+    year_built = db.Column(db.Integer)
+    improvement_value = db.Column(db.Float)
+    land_value = db.Column(db.Float)
+    parcel_value = db.Column(db.Float)
+    mail_address = db.Column(db.String)
+    mail_city = db.Column(db.String)
+    mail_state = db.Column(db.String)
+    mail_zip = db.Column(db.String)
+    mail_country = db.Column(db.String)
+    address = db.Column(db.String)
+    zip_code = db.Column(db.String)
+    building_SQFT = db.Column(db.Float)
+    building_count = db.Column(db.Integer)
+    legal_description = db.Column(db.String)
+    county = db.Column(db.String)
+    state = db.Column(db.String)
+    latitude = db.Column(db.Float)
+    longitude = db.Column(db.Float)
+    acre = db.Column(db.Float)
+    acre_sqft = db.Column(db.Float)
+    fema_flood_zone = db.Column(db.String)
+           
 
     def serialize(self):
         return {
             "id": self.id,
             "parcel_number": self.parcel_number,
             "owner": self.owner,
-            "address": self.address,
+            "zoning": self.zoning,
+            "year_built": self.year_built,
+            "improvement_value": self.improvement_value,
+            "land_value": self.land_value,
+            "parcel_value": self.parcel_value,
             "mail_address": self.mail_address,
             "mail_city": self.mail_city,
             "mail_state": self.mail_state,
             "mail_zip": self.mail_zip,
             "mail_country": self.mail_country,
+            "address": self.address,
             "zip_code": self.zip_code,
-            "latitude": self.latitude,
-            "longitude": self.longitude,
-            "improvement_value": self.improvement_value,
-            "land_value": self.land_value,
-            "parcel_value": self.parcel_value,
-            "acre": self.acre,
-            "acre_sqft": self.acre_sqft,
             "building_SQFT": self.building_SQFT,
             "building_count": self.building_count,
-            "zoning": self.zoning,
+            "legal_description": self.legal_description,
             "county": self.county,
             "state": self.state,
-            "legal_description": self.legal_description,
+            "latitude": self.latitude,
+            "longitude": self.longitude,
+            "acre": self.acre,
+            "acre_sqft": self.acre_sqft,
             "fema_flood_zone": self.fema_flood_zone,
+            "dynamic_fields": self.dynamic_fields or {},           
         }
+

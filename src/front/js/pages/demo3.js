@@ -60,9 +60,10 @@ export const DemoThree = () => {
   const fetchParcelByNumber = async (parcelNumber) => {
     try {
       const response = await fetch(
-        `https://app.regrid.com/api/v2/parcels/apn?parcelnumb=${parcelNumber}&token=eyJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJyZWdyaWQuY29tIiwiaWF0IjoxNzM3Njg5MDUwLCJleHAiOjE3NDAyODEwNTAsInUiOjQ4NzI5MCwiZyI6MjMxNTMsImNhcCI6InBhOnRzOnBzOmJmOm1hOnR5OmVvOnpvOnNiIn0.LCESilMr2HeYDj4ki5nNVSAQ5rqYobOkkTj5WS8ZQ_c`
+        `https://app.regrid.com/api/v2/parcels/apn?parcelnumb=${parcelNumber}&token=eyJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJyZWdyaWQuY29tIiwiaWF0IjoxNzM3OTQ0MDY1LCJleHAiOjE3NDA1MzYwNjUsInUiOjQ4ODIwMiwiZyI6MjMxNTMsImNhcCI6InBhOnRzOnBzOmJmOm1hOnR5OmVvOnpvOnNiIn0.2LE4zSVk1M1KrO_YoC9IWFJbNOioTqE-Rm8N9MF8cSk`
       );
-      if (!response.ok) throw new Error(`Failed to fetch parcel: ${parcelNumber}`);
+      if (!response.ok)
+        throw new Error(`Failed to fetch parcel: ${parcelNumber}`);
       const data = await response.json();
       return data.parcels?.features[0] || null;
     } catch (error) {
@@ -76,9 +77,10 @@ export const DemoThree = () => {
       const response = await fetch(
         `https://app.regrid.com/api/v2/parcels/address?query=${encodeURIComponent(
           address
-        )}&token=eyJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJyZWdyaWQuY29tIiwiaWF0IjoxNzM3Njg5MDUwLCJleHAiOjE3NDAyODEwNTAsInUiOjQ4NzI5MCwiZyI6MjMxNTMsImNhcCI6InBhOnRzOnBzOmJmOm1hOnR5OmVvOnpvOnNiIn0.LCESilMr2HeYDj4ki5nNVSAQ5rqYobOkkTj5WS8ZQ_c`
+        )}&token=eyJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJyZWdyaWQuY29tIiwiaWF0IjoxNzM3OTQ0MDY1LCJleHAiOjE3NDA1MzYwNjUsInUiOjQ4ODIwMiwiZyI6MjMxNTMsImNhcCI6InBhOnRzOnBzOmJmOm1hOnR5OmVvOnpvOnNiIn0.2LE4zSVk1M1KrO_YoC9IWFJbNOioTqE-Rm8N9MF8cSk`
       );
-      if (!response.ok) throw new Error(`Failed to fetch parcel by address: ${address}`);
+      if (!response.ok)
+        throw new Error(`Failed to fetch parcel by address: ${address}`);
       const data = await response.json();
       return data.parcels?.features[0] || null;
     } catch (error) {
@@ -90,9 +92,12 @@ export const DemoThree = () => {
   const fetchParcelByLatLon = async (latitude, longitude) => {
     try {
       const response = await fetch(
-        `https://app.regrid.com/api/v2/parcels/coordinates?lat=${latitude}&lon=${longitude}&token=YOUR_API_TOKEN`
+        `https://app.regrid.com/api/v2/parcels/coordinates?lat=${latitude}&lon=${longitude}&token=eyJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJyZWdyaWQuY29tIiwiaWF0IjoxNzM3OTQ0MDY1LCJleHAiOjE3NDA1MzYwNjUsInUiOjQ4ODIwMiwiZyI6MjMxNTMsImNhcCI6InBhOnRzOnBzOmJmOm1hOnR5OmVvOnpvOnNiIn0.2LE4zSVk1M1KrO_YoC9IWFJbNOioTqE-Rm8N9MF8cSk`
       );
-      if (!response.ok) throw new Error(`Failed to fetch parcel at coordinates (${latitude}, ${longitude})`);
+      if (!response.ok)
+        throw new Error(
+          `Failed to fetch parcel at coordinates (${latitude}, ${longitude})`
+        );
       const data = await response.json();
       return data.parcels?.features[0] || null;
     } catch (error) {
@@ -105,58 +110,65 @@ export const DemoThree = () => {
     const selectedFile = event.target.files[0];
     setFile(selectedFile);
   };
-  
+
   const handleFileUpload = async (event) => {
     event.preventDefault();
     if (!file) return Swal.fire("Please select a file.", "", "warning");
-  
+
     setLoading(true);
     try {
       const rows = await parseFileContent(file);
       validateFileContent(rows);
-  
-      const headers = rows[0].map((header) => (header ? header.trim().toLowerCase() : ""));
+
+      const headers = rows[0].map((header) =>
+        header ? header.trim().toLowerCase() : ""
+      );
       console.log("File Headers:", headers);
-  
+
       const dataRows = rows.slice(1);
-  
+
       const parcels = await Promise.all(
         dataRows.map(async (row, rowIndex) => {
           let parcelNumber = null;
           let address = null;
           let latitude = null;
           let longitude = null;
-  
+
           row.forEach((cell, columnIndex) => {
             const value = cell?.trim();
             console.log(`Row ${rowIndex + 1}, Column ${columnIndex}: ${value}`);
             if (!value) return;
-  
+
             // Aceptar cualquier tipo de texto para el número de parcela
             if (!parcelNumber) {
               parcelNumber = value; // No restricciones, cualquier texto es válido
             }
-  
+
             // Aceptar cualquier dirección que esté en el encabezado address
             if (headers[columnIndex]?.includes("address") && !address) {
               address = value; // No restricciones, cualquier texto es válido
             }
-  
+
             // Aceptar cualquier valor numérico o flotante para latitud y longitud
             if (!latitude && !isNaN(value) && value >= -90 && value <= 90) {
               latitude = parseFloat(value);
-            } else if (!longitude && !isNaN(value) && value >= -180 && value <= 180) {
+            } else if (
+              !longitude &&
+              !isNaN(value) &&
+              value >= -180 &&
+              value <= 180
+            ) {
               longitude = parseFloat(value);
             }
           });
-  
+
           console.log(`Row ${rowIndex + 1} - Parsed Data:`, {
             parcelNumber,
             address,
             latitude,
             longitude,
           });
-  
+
           // Intentar buscar datos con cualquier dato disponible
           if (parcelNumber) {
             const parcel = await fetchParcelByNumber(parcelNumber);
@@ -170,15 +182,15 @@ export const DemoThree = () => {
             const parcel = await fetchParcelByAddress(address);
             if (parcel) return parcel;
           }
-  
+
           console.warn(`No valid parcel data found for row ${rowIndex + 1}`);
           return null;
         })
       );
-  
+
       const validParcels = parcels.filter(Boolean);
       console.log("Valid Parcels:", validParcels);
-  
+
       if (validParcels.length === 0) {
         setLoading(false);
         return Swal.fire(
@@ -187,7 +199,7 @@ export const DemoThree = () => {
           "info"
         );
       }
-  
+
       setParcelDataList(validParcels);
       await actions.uploadParcels(validParcels);
       Swal.fire(
@@ -204,7 +216,6 @@ export const DemoThree = () => {
       document.querySelector('input[type="file"]').value = ""; // Resetear input
     }
   };
-
 
   return (
     <div className="upload-and-parcel-container">
@@ -258,9 +269,7 @@ export const DemoThree = () => {
               {parcelDataList.map((parcel, index) => (
                 <tr key={index}>
                   {Object.keys(headerMapping).map((key) => (
-                    <td key={key}>
-                      {parcel.properties.fields[key] || "N/A"}
-                    </td>
+                    <td key={key}>{parcel.properties.fields[key] || "N/A"}</td>
                   ))}
                 </tr>
               ))}

@@ -2,6 +2,7 @@
 This module takes care of starting the API Server, Loading the DB and Adding the endpoints
 """
 from flask import Flask, request, jsonify, url_for, Blueprint
+from sqlalchemy.dialects.postgresql import insert
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt, get_jwt_identity, current_user
 from flask_bcrypt import Bcrypt
 from src.api.utils import APIException, generate_sitemap
@@ -178,10 +179,13 @@ def upload_properties():
         return jsonify({"msg": "No data provided"}), 400
 
     parcels = body.get('parcels')
+    inserted_count = 0
+    skipped_count = 0
 
     for parcel in parcels:
         property_data = parcel.get('properties', {}).get('fields', {})
-        property_entry = Property(
+
+        stmt = insert(Property).values(
             parcel_number=property_data.get('parcelnumb'),
             owner=property_data.get('owner'),
             zoning=property_data.get('zoning'),
@@ -206,11 +210,19 @@ def upload_properties():
             acre=property_data.get('ll_gisacre'),
             acre_sqft=property_data.get('ll_gissqft'),
             fema_flood_zone=property_data.get('fema_flood_zone_raw'),
-        )
-        db.session.add(property_entry)
+        ).on_conflict_do_nothing(index_elements=['parcel_number'])  # 🔥 Ignorar duplicados
+
+        result = db.session.execute(stmt)
+        if result.rowcount > 0:
+            inserted_count += 1
+        else:
+            skipped_count += 1
 
     db.session.commit()
-    return jsonify({"msg": "Properties saved successfully"}), 200
+
+    return jsonify({
+        "msg": f"Upload completed: {inserted_count} new properties added, {skipped_count} duplicates skipped."
+    }), 200
 
 #delete all properties
 @api.route('/delete/properties', methods=['DELETE'])
@@ -260,6 +272,26 @@ def get_property(parcel_number):
     except Exception as e:
         print(f"Error al obtener la propiedad: {e}")
         return jsonify({"error": f"Error al obtener la propiedad: {str(e)}"}), 500
+    
+#Edit column property
+@api.route('/update/property/<string:parcel_number>', methods=['PUT'])
+def update_property(parcel_number):
+    try:
+        body = request.get_json()
+        property_to_update = Property.query.filter_by(parcel_number=parcel_number).first()
+        if not property_to_update:
+            return jsonify({"message": "Property not found"}), 404
+
+        # Actualiza los campos enviados desde el frontend
+        for key, value in body.items():
+            if hasattr(property_to_update, key):
+                setattr(property_to_update, key, value)
+
+        db.session.commit()
+        return jsonify({"message": "Property updated successfully"}), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": str(e)}), 500
 
 
 #@api.route('/excel', methods=['GET'])
