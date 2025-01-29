@@ -29,38 +29,56 @@ export const EditProperties = () => {
   };
 
   //Elimina cada una de las propiedades
-  const handleDeleteField = async (field) => {
+  const handleDeleteField = async (field, event) => {
+    event.preventDefault(); // 🔥 Evita la recarga de la página
+
     if (!selectedProperty) return;
+
+    const cleanField = field.trim(); // 🔥 Normalizar nombre del campo
+
+    console.log(`🗑️ Intentando eliminar el campo: ${cleanField}`);
+    console.log(
+      "📌 Estado actual de la propiedad antes de eliminar:",
+      selectedProperty
+    );
+    console.log(
+      "📌 Campos en additional_data antes de eliminar:",
+      selectedProperty.additional_data
+    );
 
     try {
       const response = await fetch(
-        `http://localhost:3001/api/delete/property-field/${selectedProperty.parcel_number}/${field}`,
-        {
-          method: "DELETE",
-        }
+        `http://localhost:3001/api/delete/property-field/${
+          selectedProperty.parcel_number
+        }/${encodeURIComponent(cleanField)}`,
+        { method: "DELETE" }
       );
 
-      if (!response.ok) throw new Error("Failed to delete field");
+      const result = await response.json();
+      console.log("✅ Respuesta del backend:", result);
 
-      alert(`Field '${field}' deleted successfully!`);
+      if (!response.ok)
+        throw new Error(result.error || "Failed to delete field");
 
-      // 🔥 Actualizar el estado localmente para reflejar el cambio en la UI
+      alert(`✅ Field '${cleanField}' deleted successfully!`);
+
+      // 🔥 Actualizar el estado localmente para reflejar la eliminación
       setSelectedProperty((prevProperty) => {
         const updatedData = { ...prevProperty };
 
         if (
           updatedData.additional_data &&
-          field in updatedData.additional_data
+          cleanField in updatedData.additional_data
         ) {
-          delete updatedData.additional_data[field]; // 🔥 Eliminar de additional_data si está ahí
-        } else {
-          delete updatedData[field]; // 🔥 Eliminar del objeto general si es un campo principal
+          delete updatedData.additional_data[cleanField]; // 🔥 Eliminar de additional_data si está ahí
+        } else if (cleanField in updatedData) {
+          delete updatedData[cleanField]; // 🔥 Eliminar del objeto general si es un campo principal
         }
 
         return updatedData;
       });
     } catch (err) {
-      console.error(err);
+      console.error("❌ Error al eliminar el campo:", err);
       alert("Error deleting the field: " + err.message);
     }
   };
@@ -209,7 +227,7 @@ export const EditProperties = () => {
                       onChange={(e) => handleFieldChange(field, e.target.value)}
                     />
                     <button
-                      onClick={() => handleDeleteField(field)}
+                      onClick={(e) => handleDeleteField(field, e)}
                       className="delete-btn"
                     >
                       Delete

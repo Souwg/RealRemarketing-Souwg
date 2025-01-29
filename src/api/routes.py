@@ -318,28 +318,48 @@ def delete_property_field(parcel_number, field_name):
         if not property_to_update:
             return jsonify({"message": "Property not found"}), 404
 
-        #Verificar si el campo está en la base de datos como atributo normal
+        field_name = field_name.strip()  # 🔥 Normalizar el nombre del campo
+
+        print(f"\n🗑️ Intentando eliminar el campo: '{field_name}' de la propiedad {parcel_number}")
+        print("📌 Estado actual de la propiedad antes de eliminar:", property_to_update.__dict__)
+        print("📌 Campos en additional_data antes de eliminar:", property_to_update.additional_data)
+
+        field_found = False  # Bandera para saber si eliminamos algo
+
+        # 🔥 Verificar si el campo es un atributo normal de la tabla
         if hasattr(property_to_update, field_name):
-            setattr(property_to_update, field_name, None)  # Opcional: Podrías usar `None` o `''`
-        
-        #Si el campo está en `additional_data`, eliminarlo de allí
-        elif property_to_update.additional_data and field_name in property_to_update.additional_data:
-            del property_to_update.additional_data[field_name]
-            flag_modified(property_to_update, "additional_data")  # SQLAlchemy detecta el cambio
-        
-        else:
+            print(f"✅ Eliminando campo '{field_name}' de la tabla Property.")
+            setattr(property_to_update, field_name, None)  # También podrías usar `""`
+            field_found = True
+
+        # 🔥 Verificar si `additional_data` es un diccionario válido y corregir estructura
+        if isinstance(property_to_update.additional_data, dict):
+            additional_data = property_to_update.additional_data
+
+            # 🔥 Si `additional_data` tiene otro nivel anidado incorrectamente, corregirlo
+            if "additional_data" in additional_data and isinstance(additional_data["additional_data"], dict):
+                print("⚠️ Se encontró additional_data anidado incorrectamente, corrigiéndolo...")
+                additional_data = additional_data["additional_data"]
+
+            # 🔥 Buscar y eliminar el campo dentro de `additional_data`
+            if field_name in additional_data:
+                print(f"✅ Eliminando campo '{field_name}' de additional_data.")
+                del additional_data[field_name]
+                property_to_update.additional_data = additional_data
+                flag_modified(property_to_update, "additional_data")  # Notificar a SQLAlchemy
+                field_found = True
+
+        if not field_found:
+            print(f"❌ Campo '{field_name}' no encontrado en la propiedad.")
             return jsonify({"message": f"Field '{field_name}' not found in the property"}), 404
 
         db.session.commit()
-
+        print(f"✅ Campo '{field_name}' eliminado correctamente.")
         return jsonify({"message": f"Field '{field_name}' deleted successfully"}), 200
 
     except Exception as e:
         db.session.rollback()
         return jsonify({"error": str(e)}), 500
-
-
-
 #@api.route('/excel', methods=['GET'])
 #def excel_data():
 
