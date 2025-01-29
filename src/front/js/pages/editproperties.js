@@ -30,11 +30,11 @@ export const EditProperties = () => {
 
   //Elimina cada una de las propiedades
   const handleDeleteField = async (field, event) => {
-    event.preventDefault(); // 🔥 Evita la recarga de la página
+    event.preventDefault(); // Evita la recarga de la página
 
     if (!selectedProperty) return;
 
-    const cleanField = field.trim(); // 🔥 Normalizar nombre del campo
+    const cleanField = field.trim(); // Normalizar nombre del campo
 
     console.log(`🗑️ Intentando eliminar el campo: ${cleanField}`);
     console.log(
@@ -62,12 +62,11 @@ export const EditProperties = () => {
 
       alert(`✅ Field '${cleanField}' deleted successfully!`);
 
-      // 🔥 ACTUALIZAR selectedProperty PARA QUE SE REFLEJE EN LA UI
+      // Actualizar selectedProperty para que se refleje en la UI
       setSelectedProperty((prevProperty) => {
-        // Copiar el estado anterior
         const updatedData = { ...prevProperty };
 
-        // Eliminar solo si el campo está en additional_data
+        // Eliminar el campo si está en additional_data
         if (
           updatedData.additional_data &&
           cleanField in updatedData.additional_data
@@ -75,9 +74,14 @@ export const EditProperties = () => {
           delete updatedData.additional_data[cleanField];
         }
 
+        // Eliminar el campo si es un atributo normal de la propiedad
+        if (updatedData[cleanField] !== undefined) {
+          updatedData[cleanField] = null;
+        }
+
         return {
           ...updatedData,
-          additional_data: { ...updatedData.additional_data }, // 🔥 Forzar actualización de React
+          additional_data: { ...updatedData.additional_data }, // Forzar actualización de React
         };
       });
     } catch (err) {
@@ -85,7 +89,6 @@ export const EditProperties = () => {
       alert("Error deleting the field: " + err.message);
     }
   };
-
   // Obtener las propiedades al cargar el componente
   useEffect(() => {
     const fetchProperties = async () => {
@@ -199,27 +202,29 @@ export const EditProperties = () => {
           <h4>Editing Property: {selectedProperty.parcel_number}</h4>
           <form>
             {/* Renderizar campos principales de la propiedad */}
-            {Object.entries(selectedProperty).map(([field, value]) => (
-              <div className="form-group" key={field}>
-                <label>{field.replace(/_/g, " ").toUpperCase()}</label>
-                <input
-                  type="text"
-                  value={editedFields[field] ?? value ?? ""}
-                  onChange={(e) => handleFieldChange(field, e.target.value)}
-                />
-                {/* 🔥 Solo mostrar botón de eliminar si el campo está dentro de additional_data */}
-                {selectedProperty.additional_data &&
-                  field in selectedProperty.additional_data && (
-                    <button
-                      type="button"
-                      onClick={(e) => handleDeleteField(field, e)}
-                      className="delete-btn"
-                    >
-                      Delete
-                    </button>
-                  )}
-              </div>
-            ))}
+            {Object.entries(selectedProperty).map(([field, value]) => {
+              // Excluir campos que no deben mostrarse (como el ID o additional_data)
+              if (field === "id" || field === "additional_data") return null;
+
+              return (
+                <div className="form-group" key={field}>
+                  <label>{field.replace(/_/g, " ").toUpperCase()}</label>
+                  <input
+                    type="text"
+                    value={editedFields[field] ?? value ?? ""}
+                    onChange={(e) => handleFieldChange(field, e.target.value)}
+                  />
+                  {/* Botón de eliminar para todos los campos */}
+                  <button
+                    type="button"
+                    onClick={(e) => handleDeleteField(field, e)}
+                    className="delete-btn"
+                  >
+                    Delete
+                  </button>
+                </div>
+              );
+            })}
 
             {/* Renderizar los campos adicionales de additional_data dinámicamente */}
             {selectedProperty.additional_data &&

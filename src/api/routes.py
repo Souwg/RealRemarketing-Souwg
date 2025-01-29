@@ -318,7 +318,7 @@ def delete_property_field(parcel_number, field_name):
         if not property_to_update:
             return jsonify({"message": "Property not found"}), 404
 
-        field_name = field_name.strip()  # 🔥 Normalizar el nombre del campo
+        field_name = field_name.strip()  # Normalizar el nombre del campo
 
         print(f"\n🗑️ Intentando eliminar el campo: '{field_name}' de la propiedad {parcel_number}")
         print("📌 Estado actual de la propiedad antes de eliminar:", property_to_update.__dict__)
@@ -326,22 +326,22 @@ def delete_property_field(parcel_number, field_name):
 
         field_found = False  # Bandera para saber si eliminamos algo
 
-        # 🔥 Verificar si el campo es un atributo normal de la tabla
+        # Verificar si el campo es un atributo normal de la tabla
         if hasattr(property_to_update, field_name):
             print(f"✅ Eliminando campo '{field_name}' de la tabla Property.")
             setattr(property_to_update, field_name, None)  # También podrías usar `""`
             field_found = True
 
-        # 🔥 Verificar si `additional_data` es un diccionario válido y corregir estructura
+        # Verificar si `additional_data` es un diccionario válido y corregir estructura
         if isinstance(property_to_update.additional_data, dict):
             additional_data = property_to_update.additional_data
 
-            # 🔥 Si `additional_data` tiene otro nivel anidado incorrectamente, corregirlo
+            # Si `additional_data` tiene otro nivel anidado incorrectamente, corregirlo
             if "additional_data" in additional_data and isinstance(additional_data["additional_data"], dict):
                 print("⚠️ Se encontró additional_data anidado incorrectamente, corrigiéndolo...")
                 additional_data = additional_data["additional_data"]
 
-            # 🔥 Buscar y eliminar el campo dentro de `additional_data`
+            # Buscar y eliminar el campo dentro de `additional_data`
             if field_name in additional_data:
                 print(f"✅ Eliminando campo '{field_name}' de additional_data.")
                 del additional_data[field_name]
