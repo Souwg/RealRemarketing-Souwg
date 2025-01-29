@@ -292,7 +292,7 @@ def update_property(parcel_number):
         if property_to_update.additional_data is None:
             property_to_update.additional_data = {}
 
-        # 🔥 Simplemente asegurarse de que no se está guardando None
+        # Simplemente asegurarse de que no se está guardando None
         for key, value in body.items():
             if value is None:
                 continue  # Ignorar valores nulos para evitar errores
@@ -304,6 +304,35 @@ def update_property(parcel_number):
         db.session.commit()
 
         return jsonify({"message": "Property updated successfully", "updated_data": property_to_update.additional_data}), 200
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": str(e)}), 500
+    
+#Delete one by one cell
+@api.route('/delete/property-field/<string:parcel_number>/<string:field_name>', methods=['DELETE'])
+def delete_property_field(parcel_number, field_name):
+    try:
+        property_to_update = Property.query.filter_by(parcel_number=parcel_number).first()
+
+        if not property_to_update:
+            return jsonify({"message": "Property not found"}), 404
+
+        #Verificar si el campo está en la base de datos como atributo normal
+        if hasattr(property_to_update, field_name):
+            setattr(property_to_update, field_name, None)  # Opcional: Podrías usar `None` o `''`
+        
+        #Si el campo está en `additional_data`, eliminarlo de allí
+        elif property_to_update.additional_data and field_name in property_to_update.additional_data:
+            del property_to_update.additional_data[field_name]
+            flag_modified(property_to_update, "additional_data")  # SQLAlchemy detecta el cambio
+        
+        else:
+            return jsonify({"message": f"Field '{field_name}' not found in the property"}), 404
+
+        db.session.commit()
+
+        return jsonify({"message": f"Field '{field_name}' deleted successfully"}), 200
 
     except Exception as e:
         db.session.rollback()

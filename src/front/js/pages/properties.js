@@ -45,7 +45,7 @@ export const ShowProperties = () => {
   // ✅ RESTAURADO EL LOADING TAL CUAL COMO ESTABA ANTES
   if (loading)
     return (
-      <div class="loader">
+      <div className="loader">
         <div>
           <ul>
             <li>

@@ -12,27 +12,57 @@ export const EditProperties = () => {
   // Agregar campos nuevos
   const handleAddField = () => {
     if (!newField.trim()) return;
-
-    // 🔥 Asegurar que los campos nuevos también se reflejen en `selectedProperty.additional_data`
     setSelectedProperty((prevProperty) => ({
       ...prevProperty,
       additional_data: {
-        ...(prevProperty.additional_data || {}), // Mantiene lo que ya está en `additional_data`
-        [newField]: newFieldValue, // Agrega solo el nuevo campo
+        ...(prevProperty.additional_data || {}),
+        [newField]: newFieldValue,
       },
     }));
-
-    // 🔥 También actualizar `editedFields` para que se envíen los datos correctos al backend
     setEditedFields((prevFields) => ({
       ...prevFields,
       [newField]: newFieldValue,
     }));
-
     console.log("Nuevo campo agregado:", newField, newFieldValue);
-
-    // Limpiar inputs
     setNewField("");
     setNewFieldValue("");
+  };
+
+  //Elimina cada una de las propiedades
+  const handleDeleteField = async (field) => {
+    if (!selectedProperty) return;
+
+    try {
+      const response = await fetch(
+        `http://localhost:3001/api/delete/property-field/${selectedProperty.parcel_number}/${field}`,
+        {
+          method: "DELETE",
+        }
+      );
+
+      if (!response.ok) throw new Error("Failed to delete field");
+
+      alert(`Field '${field}' deleted successfully!`);
+
+      // 🔥 Actualizar el estado localmente para reflejar el cambio en la UI
+      setSelectedProperty((prevProperty) => {
+        const updatedData = { ...prevProperty };
+
+        if (
+          updatedData.additional_data &&
+          field in updatedData.additional_data
+        ) {
+          delete updatedData.additional_data[field]; // 🔥 Eliminar de additional_data si está ahí
+        } else {
+          delete updatedData[field]; // 🔥 Eliminar del objeto general si es un campo principal
+        }
+
+        return updatedData;
+      });
+    } catch (err) {
+      console.error(err);
+      alert("Error deleting the field: " + err.message);
+    }
   };
 
   // Obtener las propiedades al cargar el componente
@@ -149,14 +179,20 @@ export const EditProperties = () => {
           <form>
             {/* Renderizar campos principales de la propiedad */}
             {Object.entries(selectedProperty).map(([field, value]) =>
-              field !== "additional_data" ? ( // 🔥 Evita mostrar additional_data como JSON
+              field !== "additional_data" ? (
                 <div className="form-group" key={field}>
                   <label>{field.replace(/_/g, " ").toUpperCase()}</label>
                   <input
                     type="text"
-                    value={editedFields[field] ?? value}
+                    value={editedFields[field] ?? value ?? ""}
                     onChange={(e) => handleFieldChange(field, e.target.value)}
                   />
+                  <button
+                    onClick={() => handleDeleteField(field)}
+                    className="delete-btn"
+                  >
+                    Delete
+                  </button>
                 </div>
               ) : null
             )}
@@ -169,9 +205,15 @@ export const EditProperties = () => {
                     <label>{field.replace(/_/g, " ").toUpperCase()}</label>
                     <input
                       type="text"
-                      value={editedFields[field] ?? value}
+                      value={editedFields[field] ?? value ?? ""}
                       onChange={(e) => handleFieldChange(field, e.target.value)}
                     />
+                    <button
+                      onClick={() => handleDeleteField(field)}
+                      className="delete-btn"
+                    >
+                      Delete
+                    </button>
                   </div>
                 )
               )}
