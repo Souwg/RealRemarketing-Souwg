@@ -7,6 +7,33 @@ export const EditProperties = () => {
   const [editedFields, setEditedFields] = useState({}); // Campos editados
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [newField, setNewField] = useState("");
+  const [newFieldValue, setNewFieldValue] = useState("");
+  // Agregar campos nuevos
+  const handleAddField = () => {
+    if (!newField.trim()) return;
+
+    // 🔥 Asegurar que los campos nuevos también se reflejen en `selectedProperty.additional_data`
+    setSelectedProperty((prevProperty) => ({
+      ...prevProperty,
+      additional_data: {
+        ...(prevProperty.additional_data || {}), // Mantiene lo que ya está en `additional_data`
+        [newField]: newFieldValue, // Agrega solo el nuevo campo
+      },
+    }));
+
+    // 🔥 También actualizar `editedFields` para que se envíen los datos correctos al backend
+    setEditedFields((prevFields) => ({
+      ...prevFields,
+      [newField]: newFieldValue,
+    }));
+
+    console.log("Nuevo campo agregado:", newField, newFieldValue);
+
+    // Limpiar inputs
+    setNewField("");
+    setNewFieldValue("");
+  };
 
   // Obtener las propiedades al cargar el componente
   useEffect(() => {
@@ -33,8 +60,15 @@ export const EditProperties = () => {
     const property = properties.find(
       (property) => property.parcel_number === parcelNumber
     );
-    setSelectedProperty(property);
-    setEditedFields({}); // Resetear los campos editados
+
+    // Combinar los campos de la propiedad con additional_data
+    const fullProperty = {
+      ...property,
+      ...property.additional_data, // 🔥 Agregar los campos personalizados
+    };
+
+    setSelectedProperty(fullProperty);
+    setEditedFields(fullProperty); // También inicializar los valores editables
   };
 
   // Manejar los cambios en los campos del formulario
@@ -48,7 +82,6 @@ export const EditProperties = () => {
   // Enviar los cambios al backend
   const saveChanges = async () => {
     if (!selectedProperty) return;
-
     try {
       const response = await fetch(
         `http://localhost:3001/api/update/property/${selectedProperty.parcel_number}`,
@@ -57,7 +90,9 @@ export const EditProperties = () => {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify(editedFields),
+          body: JSON.stringify({
+            additional_data: selectedProperty.additional_data,
+          }),
         }
       );
 
@@ -74,7 +109,7 @@ export const EditProperties = () => {
             : property
         )
       );
-      setEditedFields({});
+      setEditedFields((prev) => ({ ...prev }));
     } catch (err) {
       console.error(err);
       alert("Error updating the property: " + err.message);
@@ -112,17 +147,53 @@ export const EditProperties = () => {
         <div className="edit-form">
           <h4>Editing Property: {selectedProperty.parcel_number}</h4>
           <form>
-            {Object.keys(selectedProperty).map((field) => (
-              <div className="form-group" key={field}>
-                <label>{field.replace(/_/g, " ").toUpperCase()}</label>
-                <input
-                  type="text"
-                  defaultValue={selectedProperty[field]}
-                  onChange={(e) => handleFieldChange(field, e.target.value)}
-                />
-              </div>
-            ))}
+            {/* Renderizar campos principales de la propiedad */}
+            {Object.entries(selectedProperty).map(([field, value]) =>
+              field !== "additional_data" ? ( // 🔥 Evita mostrar additional_data como JSON
+                <div className="form-group" key={field}>
+                  <label>{field.replace(/_/g, " ").toUpperCase()}</label>
+                  <input
+                    type="text"
+                    value={editedFields[field] ?? value}
+                    onChange={(e) => handleFieldChange(field, e.target.value)}
+                  />
+                </div>
+              ) : null
+            )}
+
+            {/* Renderizar los campos adicionales de additional_data dinámicamente */}
+            {selectedProperty.additional_data &&
+              Object.entries(selectedProperty.additional_data).map(
+                ([field, value]) => (
+                  <div className="form-group" key={field}>
+                    <label>{field.replace(/_/g, " ").toUpperCase()}</label>
+                    <input
+                      type="text"
+                      value={editedFields[field] ?? value}
+                      onChange={(e) => handleFieldChange(field, e.target.value)}
+                    />
+                  </div>
+                )
+              )}
           </form>
+
+          {/* Inputs para agregar nuevos campos dinámicos */}
+          <div className="add-new-field">
+            <input
+              type="text"
+              placeholder="New field name"
+              value={newField}
+              onChange={(e) => setNewField(e.target.value)}
+            />
+            <input
+              type="text"
+              placeholder="Value"
+              value={newFieldValue}
+              onChange={(e) => setNewFieldValue(e.target.value)}
+            />
+            <button onClick={handleAddField}>Add Field</button>
+          </div>
+
           <button onClick={saveChanges} className="save-btn">
             Save Changes
           </button>

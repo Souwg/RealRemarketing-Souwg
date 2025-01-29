@@ -3,8 +3,9 @@ This module takes care of starting the API Server, Loading the DB and Adding the
 """
 from flask import Flask, request, jsonify, url_for, Blueprint
 from sqlalchemy.dialects.postgresql import insert
-from flask_jwt_extended import create_access_token, jwt_required, get_jwt, get_jwt_identity, current_user
+from flask_jwt_extended import create_access_token, jwt_required, get_jwt,get_jwt_identity, current_user
 from flask_bcrypt import Bcrypt
+from sqlalchemy.orm.attributes import flag_modified
 from src.api.utils import APIException, generate_sitemap
 from .models import User
 from .models import Files, db
@@ -274,24 +275,40 @@ def get_property(parcel_number):
         return jsonify({"error": f"Error al obtener la propiedad: {str(e)}"}), 500
     
 #Edit column property
+from sqlalchemy.orm.attributes import flag_modified
+
 @api.route('/update/property/<string:parcel_number>', methods=['PUT'])
 def update_property(parcel_number):
     try:
         body = request.get_json()
+        
+        if not body:
+            return jsonify({"error": "No data provided"}), 400
+
         property_to_update = Property.query.filter_by(parcel_number=parcel_number).first()
         if not property_to_update:
             return jsonify({"message": "Property not found"}), 404
 
-        # Actualiza los campos enviados desde el frontend
-        for key, value in body.items():
-            if hasattr(property_to_update, key):
-                setattr(property_to_update, key, value)
+        if property_to_update.additional_data is None:
+            property_to_update.additional_data = {}
 
+        # 🔥 Simplemente asegurarse de que no se está guardando None
+        for key, value in body.items():
+            if value is None:
+                continue  # Ignorar valores nulos para evitar errores
+            property_to_update.additional_data[key] = value
+
+        property_to_update.additional_data.update(body)
+        flag_modified(property_to_update, "additional_data")
+        db.session.add(property_to_update)
         db.session.commit()
-        return jsonify({"message": "Property updated successfully"}), 200
+
+        return jsonify({"message": "Property updated successfully", "updated_data": property_to_update.additional_data}), 200
+
     except Exception as e:
         db.session.rollback()
         return jsonify({"error": str(e)}), 500
+
 
 
 #@api.route('/excel', methods=['GET'])

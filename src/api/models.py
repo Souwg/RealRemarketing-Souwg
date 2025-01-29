@@ -59,7 +59,6 @@ class Files(db.Model):
 class Property(db.Model):
     __tablename__ = "properties"
     id = db.Column(db.Integer, primary_key=True)
-    dynamic_fields = db.Column(JSON) 
     parcel_number = db.Column(db.String, unique=True, nullable=False)
     owner = db.Column(db.String)
     zoning = db.Column(db.String)
@@ -84,7 +83,7 @@ class Property(db.Model):
     acre = db.Column(db.Float)
     acre_sqft = db.Column(db.Float)
     fema_flood_zone = db.Column(db.String)
-           
+    additional_data = db.Column(JSON, default={})
 
     def serialize(self):
         return {
@@ -113,6 +112,6 @@ class Property(db.Model):
             "acre": self.acre,
             "acre_sqft": self.acre_sqft,
             "fema_flood_zone": self.fema_flood_zone,
-            "dynamic_fields": self.dynamic_fields or {},           
+            "additional_data": self.additional_data if self.additional_data else {}          
         }
 
