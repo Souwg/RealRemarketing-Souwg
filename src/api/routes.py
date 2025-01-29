@@ -2,8 +2,10 @@
 This module takes care of starting the API Server, Loading the DB and Adding the endpoints
 """
 from flask import Flask, request, jsonify, url_for, Blueprint
-from flask_jwt_extended import create_access_token, jwt_required, get_jwt, get_jwt_identity, current_user
+from sqlalchemy.dialects.postgresql import insert
+from flask_jwt_extended import create_access_token, jwt_required, get_jwt,get_jwt_identity, current_user
 from flask_bcrypt import Bcrypt
+from sqlalchemy.orm.attributes import flag_modified
 from src.api.utils import APIException, generate_sitemap
 from .models import User
 from .models import Files, db
@@ -178,10 +180,13 @@ def upload_properties():
         return jsonify({"msg": "No data provided"}), 400
 
     parcels = body.get('parcels')
+    inserted_count = 0
+    skipped_count = 0
 
     for parcel in parcels:
         property_data = parcel.get('properties', {}).get('fields', {})
-        property_entry = Property(
+
+        stmt = insert(Property).values(
             parcel_number=property_data.get('parcelnumb'),
             owner=property_data.get('owner'),
             zoning=property_data.get('zoning'),
@@ -206,11 +211,19 @@ def upload_properties():
             acre=property_data.get('ll_gisacre'),
             acre_sqft=property_data.get('ll_gissqft'),
             fema_flood_zone=property_data.get('fema_flood_zone_raw'),
-        )
-        db.session.add(property_entry)
+        ).on_conflict_do_nothing(index_elements=['parcel_number'])  # 🔥 Ignorar duplicados
+
+        result = db.session.execute(stmt)
+        if result.rowcount > 0:
+            inserted_count += 1
+        else:
+            skipped_count += 1
 
     db.session.commit()
-    return jsonify({"msg": "Properties saved successfully"}), 200
+
+    return jsonify({
+        "msg": f"Upload completed: {inserted_count} new properties added, {skipped_count} duplicates skipped."
+    }), 200
 
 #delete all properties
 @api.route('/delete/properties', methods=['DELETE'])
@@ -260,6 +273,71 @@ def get_property(parcel_number):
     except Exception as e:
         print(f"Error al obtener la propiedad: {e}")
         return jsonify({"error": f"Error al obtener la propiedad: {str(e)}"}), 500
+    
+#Edit column property
+from sqlalchemy.orm.attributes import flag_modified
+
+@api.route('/update/property/<string:parcel_number>', methods=['PUT'])
+def update_property(parcel_number):
+    try:
+        body = request.get_json()
+        
+        if not body:
+            return jsonify({"error": "No data provided"}), 400
+
+        property_to_update = Property.query.filter_by(parcel_number=parcel_number).first()
+        if not property_to_update:
+            return jsonify({"message": "Property not found"}), 404
+
+        if property_to_update.additional_data is None:
+            property_to_update.additional_data = {}
+
+        # Simplemente asegurarse de que no se está guardando None
+        for key, value in body.items():
+            if value is None:
+                continue  # Ignorar valores nulos para evitar errores
+            property_to_update.additional_data[key] = value
+
+        property_to_update.additional_data.update(body)
+        flag_modified(property_to_update, "additional_data")
+        db.session.add(property_to_update)
+        db.session.commit()
+
+        return jsonify({"message": "Property updated successfully", "updated_data": property_to_update.additional_data}), 200
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": str(e)}), 500
+    
+#Delete one by one cell
+@api.route('/delete/property-field/<string:parcel_number>/<string:field_name>', methods=['DELETE'])
+def delete_property_field(parcel_number, field_name):
+    try:
+        property_to_update = Property.query.filter_by(parcel_number=parcel_number).first()
+
+        if not property_to_update:
+            return jsonify({"message": "Property not found"}), 404
+
+        #Verificar si el campo está en la base de datos como atributo normal
+        if hasattr(property_to_update, field_name):
+            setattr(property_to_update, field_name, None)  # Opcional: Podrías usar `None` o `''`
+        
+        #Si el campo está en `additional_data`, eliminarlo de allí
+        elif property_to_update.additional_data and field_name in property_to_update.additional_data:
+            del property_to_update.additional_data[field_name]
+            flag_modified(property_to_update, "additional_data")  # SQLAlchemy detecta el cambio
+        
+        else:
+            return jsonify({"message": f"Field '{field_name}' not found in the property"}), 404
+
+        db.session.commit()
+
+        return jsonify({"message": f"Field '{field_name}' deleted successfully"}), 200
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": str(e)}), 500
+
 
 
 #@api.route('/excel', methods=['GET'])
