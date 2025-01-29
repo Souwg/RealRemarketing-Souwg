@@ -29,38 +29,59 @@ export const EditProperties = () => {
   };
 
   //Elimina cada una de las propiedades
-  const handleDeleteField = async (field) => {
+  const handleDeleteField = async (field, event) => {
+    event.preventDefault(); // 🔥 Evita la recarga de la página
+
     if (!selectedProperty) return;
+
+    const cleanField = field.trim(); // 🔥 Normalizar nombre del campo
+
+    console.log(`🗑️ Intentando eliminar el campo: ${cleanField}`);
+    console.log(
+      "📌 Estado actual de la propiedad antes de eliminar:",
+      selectedProperty
+    );
+    console.log(
+      "📌 Campos en additional_data antes de eliminar:",
+      selectedProperty.additional_data
+    );
 
     try {
       const response = await fetch(
-        `http://localhost:3001/api/delete/property-field/${selectedProperty.parcel_number}/${field}`,
-        {
-          method: "DELETE",
-        }
+        `http://localhost:3001/api/delete/property-field/${
+          selectedProperty.parcel_number
+        }/${encodeURIComponent(cleanField)}`,
+        { method: "DELETE" }
       );
 
-      if (!response.ok) throw new Error("Failed to delete field");
+      const result = await response.json();
+      console.log("✅ Respuesta del backend:", result);
 
-      alert(`Field '${field}' deleted successfully!`);
+      if (!response.ok)
+        throw new Error(result.error || "Failed to delete field");
 
-      // 🔥 Actualizar el estado localmente para reflejar el cambio en la UI
+      alert(`✅ Field '${cleanField}' deleted successfully!`);
+
+      // 🔥 ACTUALIZAR selectedProperty PARA QUE SE REFLEJE EN LA UI
       setSelectedProperty((prevProperty) => {
+        // Copiar el estado anterior
         const updatedData = { ...prevProperty };
 
+        // Eliminar solo si el campo está en additional_data
         if (
           updatedData.additional_data &&
-          field in updatedData.additional_data
+          cleanField in updatedData.additional_data
         ) {
-          delete updatedData.additional_data[field]; // 🔥 Eliminar de additional_data si está ahí
-        } else {
-          delete updatedData[field]; // 🔥 Eliminar del objeto general si es un campo principal
+          delete updatedData.additional_data[cleanField];
         }
 
-        return updatedData;
+        return {
+          ...updatedData,
+          additional_data: { ...updatedData.additional_data }, // 🔥 Forzar actualización de React
+        };
       });
     } catch (err) {
-      console.error(err);
+      console.error("❌ Error al eliminar el campo:", err);
       alert("Error deleting the field: " + err.message);
     }
   };
@@ -178,24 +199,27 @@ export const EditProperties = () => {
           <h4>Editing Property: {selectedProperty.parcel_number}</h4>
           <form>
             {/* Renderizar campos principales de la propiedad */}
-            {Object.entries(selectedProperty).map(([field, value]) =>
-              field !== "additional_data" ? (
-                <div className="form-group" key={field}>
-                  <label>{field.replace(/_/g, " ").toUpperCase()}</label>
-                  <input
-                    type="text"
-                    value={editedFields[field] ?? value ?? ""}
-                    onChange={(e) => handleFieldChange(field, e.target.value)}
-                  />
-                  <button
-                    onClick={() => handleDeleteField(field)}
-                    className="delete-btn"
-                  >
-                    Delete
-                  </button>
-                </div>
-              ) : null
-            )}
+            {Object.entries(selectedProperty).map(([field, value]) => (
+              <div className="form-group" key={field}>
+                <label>{field.replace(/_/g, " ").toUpperCase()}</label>
+                <input
+                  type="text"
+                  value={editedFields[field] ?? value ?? ""}
+                  onChange={(e) => handleFieldChange(field, e.target.value)}
+                />
+                {/* 🔥 Solo mostrar botón de eliminar si el campo está dentro de additional_data */}
+                {selectedProperty.additional_data &&
+                  field in selectedProperty.additional_data && (
+                    <button
+                      type="button"
+                      onClick={(e) => handleDeleteField(field, e)}
+                      className="delete-btn"
+                    >
+                      Delete
+                    </button>
+                  )}
+              </div>
+            ))}
 
             {/* Renderizar los campos adicionales de additional_data dinámicamente */}
             {selectedProperty.additional_data &&
@@ -209,7 +233,7 @@ export const EditProperties = () => {
                       onChange={(e) => handleFieldChange(field, e.target.value)}
                     />
                     <button
-                      onClick={() => handleDeleteField(field)}
+                      onClick={(e) => handleDeleteField(field, e)}
                       className="delete-btn"
                     >
                       Delete
