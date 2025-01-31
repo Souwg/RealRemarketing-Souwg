@@ -275,38 +275,59 @@ def get_property(parcel_number):
         return jsonify({"error": f"Error al obtener la propiedad: {str(e)}"}), 500
     
 #Edit column property
-from sqlalchemy.orm.attributes import flag_modified
-
 @api.route('/update/property/<string:parcel_number>', methods=['PUT'])
 def update_property(parcel_number):
     try:
         body = request.get_json()
-        
+        print("📌 Datos recibidos en el backend:", body)  # Debugging
+
         if not body:
             return jsonify({"error": "No data provided"}), 400
 
+        # Buscar la propiedad
         property_to_update = Property.query.filter_by(parcel_number=parcel_number).first()
         if not property_to_update:
             return jsonify({"message": "Property not found"}), 404
 
-        if property_to_update.additional_data is None:
-            property_to_update.additional_data = {}
+        # Lista de campos numéricos en la base de datos (ajusta según tu modelo)
+        numeric_fields = [
+            "acre", "acre_sqft", "building_SQFT", "building_count",
+            "improvement_value", "land_value", "latitude", "longitude",
+            "parcel_value", "year_built"
+        ]
 
-        # Simplemente asegurarse de que no se está guardando None
+        # Validar y convertir los datos antes de actualizar
         for key, value in body.items():
-            if value is None:
-                continue  # Ignorar valores nulos para evitar errores
-            property_to_update.additional_data[key] = value
+            print(f"🔄 Intentando actualizar {key}: {value}")  # Debugging
 
-        property_to_update.additional_data.update(body)
+            if hasattr(property_to_update, key):  
+                # Si es un campo numérico, intentamos convertirlo a número
+                if key in numeric_fields:
+                    try:
+                        value = float(value) if value is not None else None
+                    except ValueError:
+                        return jsonify({"error": f"Invalid value for {key}: {value}"}), 400
+                
+                setattr(property_to_update, key, value)
+
+            else:
+                # Si el campo no existe en la tabla, guardarlo en additional_data
+                if property_to_update.additional_data is None:
+                    property_to_update.additional_data = {}
+
+                if value is None:
+                    property_to_update.additional_data.pop(key, None)
+                else:
+                    property_to_update.additional_data[key] = value
+
         flag_modified(property_to_update, "additional_data")
-        db.session.add(property_to_update)
         db.session.commit()
 
-        return jsonify({"message": "Property updated successfully", "updated_data": property_to_update.additional_data}), 200
+        return jsonify({"message": "Property updated successfully"}), 200
 
     except Exception as e:
         db.session.rollback()
+        print("❌ Error en el backend:", str(e))
         return jsonify({"error": str(e)}), 500
     
 #Delete one by one cell
