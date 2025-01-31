@@ -45,17 +45,40 @@ export const EditProperties = () => {
   };
 
   // Agrega un nuevo campo dinámico a la propiedad seleccionada
-  const handleAddField = () => {
+  const handleAddField = async () => {
     if (!newField.trim()) return; // Evita campos vacíos
-    setSelectedProperty((prev) => ({
-      ...prev,
-      additional_data: { ...prev.additional_data, [newField]: newFieldValue }, // Agrega el nuevo campo
-    }));
-    setEditedFields((prev) => ({ ...prev, [newField]: newFieldValue })); // Actualiza los campos editados
-    setNewField(""); // Limpia el input del nombre del campo
-    setNewFieldValue(""); // Limpia el input del valor del campo
-  };
 
+    try {
+      // 1. Enviar la solicitud al servidor para guardar el campo en la base de datos
+      const response = await fetch(
+        `http://localhost:3001/api/add/property-field/${selectedProperty.parcel_number}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ field: newField, value: newFieldValue }),
+        }
+      );
+
+      if (!response.ok) throw new Error("Failed to save new field");
+
+      // 2. Actualizar el estado local con el nuevo campo
+      const newFieldData = { [newField]: newFieldValue };
+      setSelectedProperty((prev) => ({
+        ...prev,
+        additional_data: { ...prev.additional_data, ...newFieldData },
+      }));
+      setEditedFields((prev) => ({ ...prev, ...newFieldData }));
+
+      // 3. Limpiar los inputs después de guardar
+      setNewField("");
+      setNewFieldValue("");
+
+      alert("✅ New field added and saved successfully!");
+    } catch (err) {
+      console.error("❌ Error adding new field:", err);
+      alert("Error adding the new field: " + err.message);
+    }
+  };
   // Elimina un campo de la propiedad seleccionada
   const handleDeleteField = async (field, event) => {
     event.preventDefault(); // Evita la recarga de la página
@@ -63,15 +86,17 @@ export const EditProperties = () => {
 
     const cleanField = field.trim(); // Normaliza el nombre del campo
     try {
+      // 1. Enviar la solicitud al servidor para eliminar el campo
       const response = await fetch(
         `http://localhost:3001/api/delete/property-field/${
           selectedProperty.parcel_number
         }/${encodeURIComponent(cleanField)}`,
         { method: "DELETE" }
       );
+
       if (!response.ok) throw new Error("Failed to delete field");
 
-      // Actualizar selectedProperty para que se refleje en la UI
+      // 2. Actualizar el estado local para reflejar la eliminación
       setSelectedProperty((prev) => {
         const updatedData = { ...prev };
 
@@ -94,7 +119,7 @@ export const EditProperties = () => {
         };
       });
 
-      // Eliminar el campo de editedFields si existe
+      // 3. Eliminar el campo de editedFields si existe
       setEditedFields((prev) => {
         const updatedFields = { ...prev };
         if (updatedFields[cleanField] !== undefined)
@@ -114,14 +139,19 @@ export const EditProperties = () => {
     if (!selectedProperty) return;
 
     try {
+      // 1. Crear un objeto con todos los campos editados (incluyendo additional_data)
+      const fieldsToUpdate = { ...editedFields };
+
+      // 2. Enviar la solicitud al servidor para actualizar los campos
       const response = await fetch(
         `http://localhost:3001/api/update/property/${selectedProperty.parcel_number}`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(editedFields), // Ahora enviamos todos los campos editados
+          body: JSON.stringify(fieldsToUpdate),
         }
       );
+
       if (!response.ok) throw new Error("Failed to update property");
 
       alert("Property updated successfully!");
@@ -190,31 +220,34 @@ export const EditProperties = () => {
             <tbody>
               {/* 📌 CAMPOS ESTÁTICOS */}
               {Object.entries(selectedProperty)
-                .filter(([field, value]) => value !== null) // 🔥 Filtrar los eliminados
-                .map(([field, value]) =>
-                  field !== "additional_data" ? (
-                    <tr key={field}>
-                      <td>{field.replace(/_/g, " ").toUpperCase()}</td>
-                      <td>
-                        <input
-                          type="text"
-                          value={editedFields[field] ?? value ?? ""}
-                          onChange={(e) =>
-                            handleFieldChange(field, e.target.value)
-                          }
-                        />
-                      </td>
-                      <td>
-                        <button
-                          onClick={(e) => handleDeleteField(field, e)}
-                          className="delete-btn"
-                        >
-                          🗑
-                        </button>
-                      </td>
-                    </tr>
-                  ) : null
-                )}
+                .filter(
+                  ([field, value]) =>
+                    value !== null &&
+                    field !== "additional_data" && // Excluir additional_data
+                    !selectedProperty.additional_data?.[field] // Excluir campos dinámicos
+                )
+                .map(([field, value]) => (
+                  <tr key={field}>
+                    <td>{field.replace(/_/g, " ").toUpperCase()}</td>
+                    <td>
+                      <input
+                        type="text"
+                        value={editedFields[field] ?? value ?? ""}
+                        onChange={(e) =>
+                          handleFieldChange(field, e.target.value)
+                        }
+                      />
+                    </td>
+                    <td>
+                      <button
+                        onClick={(e) => handleDeleteField(field, e)}
+                        className="delete-btn"
+                      >
+                        🗑
+                      </button>
+                    </td>
+                  </tr>
+                ))}
 
               {/* 📌 CAMPOS DINÁMICOS (additional_data) */}
               {selectedProperty.additional_data &&

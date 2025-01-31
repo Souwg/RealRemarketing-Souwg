@@ -289,36 +289,15 @@ def update_property(parcel_number):
         if not property_to_update:
             return jsonify({"message": "Property not found"}), 404
 
-        # Lista de campos numéricos en la base de datos (ajusta según tu modelo)
-        numeric_fields = [
-            "acre", "acre_sqft", "building_SQFT", "building_count",
-            "improvement_value", "land_value", "latitude", "longitude",
-            "parcel_value", "year_built"
-        ]
-
-        # Validar y convertir los datos antes de actualizar
+        # Actualizar los campos principales y additional_data
         for key, value in body.items():
-            print(f"🔄 Intentando actualizar {key}: {value}")  # Debugging
-
-            if hasattr(property_to_update, key):  
-                # Si es un campo numérico, intentamos convertirlo a número
-                if key in numeric_fields:
-                    try:
-                        value = float(value) if value is not None else None
-                    except ValueError:
-                        return jsonify({"error": f"Invalid value for {key}: {value}"}), 400
-                
+            if hasattr(property_to_update, key):
                 setattr(property_to_update, key, value)
-
             else:
                 # Si el campo no existe en la tabla, guardarlo en additional_data
                 if property_to_update.additional_data is None:
                     property_to_update.additional_data = {}
-
-                if value is None:
-                    property_to_update.additional_data.pop(key, None)
-                else:
-                    property_to_update.additional_data[key] = value
+                property_to_update.additional_data[key] = value
 
         flag_modified(property_to_update, "additional_data")
         db.session.commit()
@@ -380,6 +359,41 @@ def delete_property_field(parcel_number, field_name):
 
     except Exception as e:
         db.session.rollback()
+        return jsonify({"error": str(e)}), 500
+    
+    
+    # Ruta para agregar un nuevo campo a una propiedad
+@api.route('/add/property-field/<string:parcel_number>', methods=['POST'])
+def add_property_field(parcel_number):
+    try:
+        body = request.get_json()
+
+        if not body or not body.get('field') or not body.get('value'):
+            return jsonify({"error": "Field name and value are required"}), 400
+
+        field_name = body.get('field')
+        field_value = body.get('value')
+
+        # Buscar la propiedad
+        property_to_update = Property.query.filter_by(parcel_number=parcel_number).first()
+        if not property_to_update:
+            return jsonify({"message": "Property not found"}), 404
+
+        # Si additional_data no existe, inicializarlo como un diccionario vacío
+        if property_to_update.additional_data is None:
+            property_to_update.additional_data = {}
+
+        # Agregar el nuevo campo a additional_data
+        property_to_update.additional_data[field_name] = field_value
+        flag_modified(property_to_update, "additional_data")  # Notificar a SQLAlchemy
+
+        db.session.commit()
+
+        return jsonify({"message": f"Field '{field_name}' added successfully"}), 200
+
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error adding new field: {e}")
         return jsonify({"error": str(e)}), 500
 #@api.route('/excel', methods=['GET'])
 #def excel_data():
