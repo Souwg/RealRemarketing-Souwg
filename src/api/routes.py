@@ -275,38 +275,38 @@ def get_property(parcel_number):
         return jsonify({"error": f"Error al obtener la propiedad: {str(e)}"}), 500
     
 #Edit column property
-from sqlalchemy.orm.attributes import flag_modified
-
 @api.route('/update/property/<string:parcel_number>', methods=['PUT'])
 def update_property(parcel_number):
     try:
         body = request.get_json()
-        
+        print("📌 Datos recibidos en el backend:", body)  # Debugging
+
         if not body:
             return jsonify({"error": "No data provided"}), 400
 
+        # Buscar la propiedad
         property_to_update = Property.query.filter_by(parcel_number=parcel_number).first()
         if not property_to_update:
             return jsonify({"message": "Property not found"}), 404
 
-        if property_to_update.additional_data is None:
-            property_to_update.additional_data = {}
-
-        # Simplemente asegurarse de que no se está guardando None
+        # Actualizar los campos principales y additional_data
         for key, value in body.items():
-            if value is None:
-                continue  # Ignorar valores nulos para evitar errores
-            property_to_update.additional_data[key] = value
+            if hasattr(property_to_update, key):
+                setattr(property_to_update, key, value)
+            else:
+                # Si el campo no existe en la tabla, guardarlo en additional_data
+                if property_to_update.additional_data is None:
+                    property_to_update.additional_data = {}
+                property_to_update.additional_data[key] = value
 
-        property_to_update.additional_data.update(body)
         flag_modified(property_to_update, "additional_data")
-        db.session.add(property_to_update)
         db.session.commit()
 
-        return jsonify({"message": "Property updated successfully", "updated_data": property_to_update.additional_data}), 200
+        return jsonify({"message": "Property updated successfully"}), 200
 
     except Exception as e:
         db.session.rollback()
+        print("❌ Error en el backend:", str(e))
         return jsonify({"error": str(e)}), 500
     
 #Delete one by one cell
@@ -318,7 +318,7 @@ def delete_property_field(parcel_number, field_name):
         if not property_to_update:
             return jsonify({"message": "Property not found"}), 404
 
-        field_name = field_name.strip()  # 🔥 Normalizar el nombre del campo
+        field_name = field_name.strip()  # Normalizar el nombre del campo
 
         print(f"\n🗑️ Intentando eliminar el campo: '{field_name}' de la propiedad {parcel_number}")
         print("📌 Estado actual de la propiedad antes de eliminar:", property_to_update.__dict__)
@@ -326,22 +326,22 @@ def delete_property_field(parcel_number, field_name):
 
         field_found = False  # Bandera para saber si eliminamos algo
 
-        # 🔥 Verificar si el campo es un atributo normal de la tabla
+        # Verificar si el campo es un atributo normal de la tabla
         if hasattr(property_to_update, field_name):
             print(f"✅ Eliminando campo '{field_name}' de la tabla Property.")
             setattr(property_to_update, field_name, None)  # También podrías usar `""`
             field_found = True
 
-        # 🔥 Verificar si `additional_data` es un diccionario válido y corregir estructura
+        # Verificar si `additional_data` es un diccionario válido y corregir estructura
         if isinstance(property_to_update.additional_data, dict):
             additional_data = property_to_update.additional_data
 
-            # 🔥 Si `additional_data` tiene otro nivel anidado incorrectamente, corregirlo
+            # Si `additional_data` tiene otro nivel anidado incorrectamente, corregirlo
             if "additional_data" in additional_data and isinstance(additional_data["additional_data"], dict):
                 print("⚠️ Se encontró additional_data anidado incorrectamente, corrigiéndolo...")
                 additional_data = additional_data["additional_data"]
 
-            # 🔥 Buscar y eliminar el campo dentro de `additional_data`
+            # Buscar y eliminar el campo dentro de `additional_data`
             if field_name in additional_data:
                 print(f"✅ Eliminando campo '{field_name}' de additional_data.")
                 del additional_data[field_name]
@@ -359,6 +359,41 @@ def delete_property_field(parcel_number, field_name):
 
     except Exception as e:
         db.session.rollback()
+        return jsonify({"error": str(e)}), 500
+    
+    
+    # Ruta para agregar un nuevo campo a una propiedad
+@api.route('/add/property-field/<string:parcel_number>', methods=['POST'])
+def add_property_field(parcel_number):
+    try:
+        body = request.get_json()
+
+        if not body or not body.get('field') or not body.get('value'):
+            return jsonify({"error": "Field name and value are required"}), 400
+
+        field_name = body.get('field')
+        field_value = body.get('value')
+
+        # Buscar la propiedad
+        property_to_update = Property.query.filter_by(parcel_number=parcel_number).first()
+        if not property_to_update:
+            return jsonify({"message": "Property not found"}), 404
+
+        # Si additional_data no existe, inicializarlo como un diccionario vacío
+        if property_to_update.additional_data is None:
+            property_to_update.additional_data = {}
+
+        # Agregar el nuevo campo a additional_data
+        property_to_update.additional_data[field_name] = field_value
+        flag_modified(property_to_update, "additional_data")  # Notificar a SQLAlchemy
+
+        db.session.commit()
+
+        return jsonify({"message": f"Field '{field_name}' added successfully"}), 200
+
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error adding new field: {e}")
         return jsonify({"error": str(e)}), 500
 #@api.route('/excel', methods=['GET'])
 #def excel_data():

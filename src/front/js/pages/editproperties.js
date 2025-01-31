@@ -1,52 +1,92 @@
-import React, { useState, useEffect, useContext } from "react";
-import { Context } from "../store/appContext";
+import React, { useState, useEffect } from "react";
+import "../../styles/editproperties.css";
 
 export const EditProperties = () => {
-  const [properties, setProperties] = useState([]); // Lista de propiedades
-  const [selectedProperty, setSelectedProperty] = useState(null); // Propiedad seleccionada
-  const [editedFields, setEditedFields] = useState({}); // Campos editados
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [newField, setNewField] = useState("");
-  const [newFieldValue, setNewFieldValue] = useState("");
-  // Agregar campos nuevos
-  const handleAddField = () => {
-    if (!newField.trim()) return;
-    setSelectedProperty((prevProperty) => ({
-      ...prevProperty,
-      additional_data: {
-        ...(prevProperty.additional_data || {}),
-        [newField]: newFieldValue,
-      },
-    }));
-    setEditedFields((prevFields) => ({
-      ...prevFields,
-      [newField]: newFieldValue,
-    }));
-    console.log("Nuevo campo agregado:", newField, newFieldValue);
-    setNewField("");
-    setNewFieldValue("");
+  // Estados del componente
+  const [properties, setProperties] = useState([]); // Almacena la lista de propiedades
+  const [selectedProperty, setSelectedProperty] = useState(null); // Almacena la propiedad seleccionada
+  const [editedFields, setEditedFields] = useState({}); // Almacena los campos editados
+  const [loading, setLoading] = useState(true); // Indica si se están cargando las propiedades
+  const [error, setError] = useState(null); // Almacena errores durante la carga
+  const [newField, setNewField] = useState(""); // Almacena el nombre del nuevo campo
+  const [newFieldValue, setNewFieldValue] = useState(""); // Almacena el valor del nuevo campo
+
+  // Efecto para cargar las propiedades al montar el componente
+  useEffect(() => {
+    const fetchProperties = async () => {
+      try {
+        const response = await fetch("http://localhost:3001/api/properties");
+        if (!response.ok) throw new Error("Failed to fetch properties");
+        const data = await response.json();
+        setProperties(data); // Actualiza el estado con las propiedades obtenidas
+      } catch (err) {
+        setError(err.message); // Maneja errores
+      } finally {
+        setLoading(false); // Finaliza la carga
+      }
+    };
+    fetchProperties();
+  }, []);
+
+  // Maneja la selección de una propiedad desde el dropdown
+  const handleSelectProperty = (event) => {
+    const parcelNumber = event.target.value;
+    const property = properties.find((p) => p.parcel_number === parcelNumber);
+    if (property) {
+      const fullProperty = { ...property, ...property.additional_data }; // Combina campos principales y adicionales
+      setSelectedProperty(fullProperty); // Actualiza la propiedad seleccionada
+      setEditedFields(fullProperty); // Inicializa los campos editados
+    }
   };
 
-  //Elimina cada una de las propiedades
-  const handleDeleteField = async (field, event) => {
-    event.preventDefault(); // 🔥 Evita la recarga de la página
+  // Maneja cambios en los campos del formulario
+  const handleFieldChange = (field, value) => {
+    setEditedFields((prev) => ({ ...prev, [field]: value })); // Actualiza el campo editado
+  };
 
-    if (!selectedProperty) return;
-
-    const cleanField = field.trim(); // 🔥 Normalizar nombre del campo
-
-    console.log(`🗑️ Intentando eliminar el campo: ${cleanField}`);
-    console.log(
-      "📌 Estado actual de la propiedad antes de eliminar:",
-      selectedProperty
-    );
-    console.log(
-      "📌 Campos en additional_data antes de eliminar:",
-      selectedProperty.additional_data
-    );
+  // Agrega un nuevo campo dinámico a la propiedad seleccionada
+  const handleAddField = async () => {
+    if (!newField.trim()) return; // Evita campos vacíos
 
     try {
+      // 1. Enviar la solicitud al servidor para guardar el campo en la base de datos
+      const response = await fetch(
+        `http://localhost:3001/api/add/property-field/${selectedProperty.parcel_number}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ field: newField, value: newFieldValue }),
+        }
+      );
+
+      if (!response.ok) throw new Error("Failed to save new field");
+
+      // 2. Actualizar el estado local con el nuevo campo
+      const newFieldData = { [newField]: newFieldValue };
+      setSelectedProperty((prev) => ({
+        ...prev,
+        additional_data: { ...prev.additional_data, ...newFieldData },
+      }));
+      setEditedFields((prev) => ({ ...prev, ...newFieldData }));
+
+      // 3. Limpiar los inputs después de guardar
+      setNewField("");
+      setNewFieldValue("");
+
+      alert("✅ New field added and saved successfully!");
+    } catch (err) {
+      console.error("❌ Error adding new field:", err);
+      alert("Error adding the new field: " + err.message);
+    }
+  };
+  // Elimina un campo de la propiedad seleccionada
+  const handleDeleteField = async (field, event) => {
+    event.preventDefault(); // Evita la recarga de la página
+    if (!selectedProperty) return;
+
+    const cleanField = field.trim(); // Normaliza el nombre del campo
+    try {
+      // 1. Enviar la solicitud al servidor para eliminar el campo
       const response = await fetch(
         `http://localhost:3001/api/delete/property-field/${
           selectedProperty.parcel_number
@@ -54,20 +94,18 @@ export const EditProperties = () => {
         { method: "DELETE" }
       );
 
-      const result = await response.json();
-      console.log("✅ Respuesta del backend:", result);
+      if (!response.ok) throw new Error("Failed to delete field");
 
-      if (!response.ok)
-        throw new Error(result.error || "Failed to delete field");
+      // 2. Actualizar el estado local para reflejar la eliminación
+      setSelectedProperty((prev) => {
+        const updatedData = { ...prev };
 
-      alert(`✅ Field '${cleanField}' deleted successfully!`);
+        // Eliminar el campo si es un atributo normal de la propiedad (campo principal)
+        if (updatedData[cleanField] !== undefined) {
+          updatedData[cleanField] = null; // Establecer el campo como null
+        }
 
-      // 🔥 ACTUALIZAR selectedProperty PARA QUE SE REFLEJE EN LA UI
-      setSelectedProperty((prevProperty) => {
-        // Copiar el estado anterior
-        const updatedData = { ...prevProperty };
-
-        // Eliminar solo si el campo está en additional_data
+        // Eliminar el campo si está en additional_data (campo adicional)
         if (
           updatedData.additional_data &&
           cleanField in updatedData.additional_data
@@ -77,108 +115,83 @@ export const EditProperties = () => {
 
         return {
           ...updatedData,
-          additional_data: { ...updatedData.additional_data }, // 🔥 Forzar actualización de React
+          additional_data: { ...updatedData.additional_data }, // Forzar actualización de React
         };
       });
+
+      // 3. Eliminar el campo de editedFields si existe
+      setEditedFields((prev) => {
+        const updatedFields = { ...prev };
+        if (updatedFields[cleanField] !== undefined)
+          delete updatedFields[cleanField];
+        return updatedFields;
+      });
+
+      alert(`✅ Field '${cleanField}' deleted successfully!`);
     } catch (err) {
-      console.error("❌ Error al eliminar el campo:", err);
+      console.error("❌ Error deleting field:", err);
       alert("Error deleting the field: " + err.message);
     }
   };
 
-  // Obtener las propiedades al cargar el componente
-  useEffect(() => {
-    const fetchProperties = async () => {
-      try {
-        const response = await fetch("http://localhost:3001/api/properties");
-        if (!response.ok) throw new Error("Failed to fetch properties");
-        const data = await response.json();
-        setProperties(data);
-        setError(null);
-      } catch (err) {
-        setError(err.message || "An error occurred while fetching properties.");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchProperties();
-  }, []);
-
-  // Manejar la selección de la propiedad
-  const handleSelectProperty = (event) => {
-    const parcelNumber = event.target.value;
-    const property = properties.find(
-      (property) => property.parcel_number === parcelNumber
-    );
-
-    // Combinar los campos de la propiedad con additional_data
-    const fullProperty = {
-      ...property,
-      ...property.additional_data, // 🔥 Agregar los campos personalizados
-    };
-
-    setSelectedProperty(fullProperty);
-    setEditedFields(fullProperty); // También inicializar los valores editables
-  };
-
-  // Manejar los cambios en los campos del formulario
-  const handleFieldChange = (field, value) => {
-    setEditedFields({
-      ...editedFields,
-      [field]: value,
-    });
-  };
-
-  // Enviar los cambios al backend
+  // Guarda los cambios realizados en la propiedad seleccionada
   const saveChanges = async () => {
     if (!selectedProperty) return;
+
     try {
+      // 1. Crear un objeto con todos los campos editados (incluyendo additional_data)
+      const fieldsToUpdate = { ...editedFields };
+
+      // 2. Enviar la solicitud al servidor para actualizar los campos
       const response = await fetch(
         `http://localhost:3001/api/update/property/${selectedProperty.parcel_number}`,
         {
           method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            additional_data: selectedProperty.additional_data,
-          }),
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(fieldsToUpdate),
         }
       );
 
       if (!response.ok) throw new Error("Failed to update property");
-      const data = await response.json();
-      alert("Property updated successfully!");
-      console.log("Updated property:", data);
 
-      // Actualizar la lista de propiedades localmente (opcional)
-      setProperties((prevProperties) =>
-        prevProperties.map((property) =>
-          property.parcel_number === selectedProperty.parcel_number
-            ? { ...property, ...editedFields }
-            : property
-        )
-      );
-      setEditedFields((prev) => ({ ...prev }));
+      alert("Property updated successfully!");
     } catch (err) {
-      console.error(err);
+      console.error("Error updating property:", err);
       alert("Error updating the property: " + err.message);
     }
   };
 
+  // Elimina una propiedad completa
+  const handleDeleteProperty = async (parcelNumber) => {
+    try {
+      const response = await fetch(
+        `http://localhost:3001/api/delete/property/${parcelNumber}`,
+        { method: "DELETE" }
+      );
+      if (!response.ok) throw new Error("Failed to delete property");
+      setProperties((prev) =>
+        prev.filter((p) => p.parcel_number !== parcelNumber)
+      ); // Elimina la propiedad de la lista
+      if (selectedProperty?.parcel_number === parcelNumber)
+        setSelectedProperty(null); // Limpia la propiedad seleccionada
+      alert("Property deleted successfully!");
+    } catch (err) {
+      console.error("Error deleting property:", err);
+      alert("Error deleting the property: " + err.message);
+    }
+  };
+
+  // Renderizado condicional: Muestra un mensaje de carga o error si es necesario
   if (loading) return <div>Loading properties...</div>;
   if (error) return <div>Error: {error}</div>;
 
+  // Renderizado principal del componente
   return (
     <div className="edit-properties-container">
-      <h3>Edit Properties</h3>
-
-      {/* Dropdown para seleccionar la propiedad */}
+      {/* 📌 SECCIÓN: Selección de propiedad */}
       <div className="property-selector">
-        <label htmlFor="property-select">Select Property:</label>
+        <label>Select Property:</label>
         <select
-          id="property-select"
           onChange={handleSelectProperty}
           value={selectedProperty?.parcel_number || ""}
         >
@@ -193,78 +206,109 @@ export const EditProperties = () => {
         </select>
       </div>
 
-      {/* Formulario dinámico para editar la propiedad seleccionada */}
+      {/* 📌 TABLA DE PROPIEDADES */}
       {selectedProperty && (
-        <div className="edit-form">
-          <h4>Editing Property: {selectedProperty.parcel_number}</h4>
-          <form>
-            {/* Renderizar campos principales de la propiedad */}
-            {Object.entries(selectedProperty).map(([field, value]) => (
-              <div className="form-group" key={field}>
-                <label>{field.replace(/_/g, " ").toUpperCase()}</label>
-                <input
-                  type="text"
-                  value={editedFields[field] ?? value ?? ""}
-                  onChange={(e) => handleFieldChange(field, e.target.value)}
-                />
-                {/* 🔥 Solo mostrar botón de eliminar si el campo está dentro de additional_data */}
-                {selectedProperty.additional_data &&
-                  field in selectedProperty.additional_data && (
-                    <button
-                      type="button"
-                      onClick={(e) => handleDeleteField(field, e)}
-                      className="delete-btn"
-                    >
-                      Delete
-                    </button>
-                  )}
-              </div>
-            ))}
-
-            {/* Renderizar los campos adicionales de additional_data dinámicamente */}
-            {selectedProperty.additional_data &&
-              Object.entries(selectedProperty.additional_data).map(
-                ([field, value]) => (
-                  <div className="form-group" key={field}>
-                    <label>{field.replace(/_/g, " ").toUpperCase()}</label>
-                    <input
-                      type="text"
-                      value={editedFields[field] ?? value ?? ""}
-                      onChange={(e) => handleFieldChange(field, e.target.value)}
-                    />
-                    <button
-                      onClick={(e) => handleDeleteField(field, e)}
-                      className="delete-btn"
-                    >
-                      Delete
-                    </button>
-                  </div>
+        <div className="table-container">
+          <table className="property-table">
+            <thead>
+              <tr>
+                <th>Field</th>
+                <th>Value</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {/* 📌 CAMPOS ESTÁTICOS */}
+              {Object.entries(selectedProperty)
+                .filter(
+                  ([field, value]) =>
+                    value !== null &&
+                    field !== "additional_data" && // Excluir additional_data
+                    !selectedProperty.additional_data?.[field] // Excluir campos dinámicos
                 )
-              )}
-          </form>
+                .map(([field, value]) => (
+                  <tr key={field}>
+                    <td>{field.replace(/_/g, " ").toUpperCase()}</td>
+                    <td>
+                      <input
+                        type="text"
+                        value={editedFields[field] ?? value ?? ""}
+                        onChange={(e) =>
+                          handleFieldChange(field, e.target.value)
+                        }
+                      />
+                    </td>
+                    <td>
+                      <button
+                        onClick={(e) => handleDeleteField(field, e)}
+                        className="delete-btn"
+                      >
+                        🗑
+                      </button>
+                    </td>
+                  </tr>
+                ))}
 
-          {/* Inputs para agregar nuevos campos dinámicos */}
-          <div className="add-new-field">
-            <input
-              type="text"
-              placeholder="New field name"
-              value={newField}
-              onChange={(e) => setNewField(e.target.value)}
-            />
-            <input
-              type="text"
-              placeholder="Value"
-              value={newFieldValue}
-              onChange={(e) => setNewFieldValue(e.target.value)}
-            />
-            <button onClick={handleAddField}>Add Field</button>
-          </div>
-
-          <button onClick={saveChanges} className="save-btn">
-            Save Changes
-          </button>
+              {/* 📌 CAMPOS DINÁMICOS (additional_data) */}
+              {selectedProperty.additional_data &&
+                Object.entries(selectedProperty.additional_data)
+                  .filter(([field, value]) => value !== null) // 🔥 Filtrar los eliminados
+                  .map(([field, value]) => (
+                    <tr key={field}>
+                      <td>{field.replace(/_/g, " ").toUpperCase()}</td>
+                      <td>
+                        <input
+                          type="text"
+                          value={editedFields[field] ?? value ?? ""}
+                          onChange={(e) =>
+                            handleFieldChange(field, e.target.value)
+                          }
+                        />
+                      </td>
+                      <td>
+                        <button
+                          onClick={(e) => handleDeleteField(field, e)}
+                          className="delete-btn"
+                        >
+                          🗑
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+            </tbody>
+          </table>
         </div>
       )}
+
+      {/* 📌 SECCIÓN: Agregar nuevos campos */}
+      <div className="add-new-field">
+        <input
+          type="text"
+          placeholder="New field name"
+          value={newField}
+          onChange={(e) => setNewField(e.target.value)}
+        />
+        <input
+          type="text"
+          placeholder="Value"
+          value={newFieldValue}
+          onChange={(e) => setNewFieldValue(e.target.value)}
+        />
+        <button onClick={handleAddField}>➕ Add</button>
+      </div>
+
+      {/* 📌 BOTONES DE ACCIÓN */}
+      <div className="button-container">
+        <button
+          onClick={() => handleDeleteProperty(selectedProperty.parcel_number)}
+          className="delete-property-btn"
+        >
+          ❌ Delete Property
+        </button>
+        <button onClick={saveChanges} className="save-btn">
+          💾 Save Changes
+        </button>
+      </div>
     </div>
   );
 };
