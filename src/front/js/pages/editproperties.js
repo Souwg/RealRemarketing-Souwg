@@ -29,13 +29,31 @@ export const EditProperties = () => {
   }, []);
 
   // Maneja la selección de una propiedad desde el dropdown
-  const handleSelectProperty = (event) => {
+  const handleSelectProperty = async (event) => {
     const parcelNumber = event.target.value;
     const property = properties.find((p) => p.parcel_number === parcelNumber);
     if (property) {
-      const fullProperty = { ...property, ...property.additional_data }; // Combina campos principales y adicionales
-      setSelectedProperty(fullProperty); // Actualiza la propiedad seleccionada
-      setEditedFields(fullProperty); // Inicializa los campos editados
+      // 1. Obtener los datos actualizados de la propiedad desde el servidor
+      try {
+        const response = await fetch(
+          `http://localhost:3001/api/property/${parcelNumber}`
+        );
+        if (!response.ok) throw new Error("Failed to fetch property details");
+        const updatedProperty = await response.json();
+
+        // 2. Combinar campos principales y adicionales
+        const fullProperty = {
+          ...updatedProperty,
+          ...updatedProperty.additional_data,
+        };
+
+        // 3. Actualizar el estado local
+        setSelectedProperty(fullProperty);
+        setEditedFields(fullProperty);
+      } catch (err) {
+        console.error("❌ Error fetching property details:", err);
+        alert("Error fetching property details: " + err.message);
+      }
     }
   };
 
@@ -69,7 +87,22 @@ export const EditProperties = () => {
       }));
       setEditedFields((prev) => ({ ...prev, ...newFieldData }));
 
-      // 3. Limpiar los inputs después de guardar
+      // 3. Actualizar la lista de propiedades para reflejar el cambio
+      setProperties((prevProperties) =>
+        prevProperties.map((property) =>
+          property.parcel_number === selectedProperty.parcel_number
+            ? {
+                ...property,
+                additional_data: {
+                  ...property.additional_data,
+                  ...newFieldData,
+                },
+              }
+            : property
+        )
+      );
+
+      // 4. Limpiar los inputs después de guardar
       setNewField("");
       setNewFieldValue("");
 
@@ -219,10 +252,10 @@ export const EditProperties = () => {
             </thead>
             <tbody>
               {/* 📌 CAMPOS ESTÁTICOS */}
+              {/* 📌 CAMPOS ESTÁTICOS */}
               {Object.entries(selectedProperty)
                 .filter(
                   ([field, value]) =>
-                    value !== null &&
                     field !== "additional_data" && // Excluir additional_data
                     !selectedProperty.additional_data?.[field] // Excluir campos dinámicos
                 )
