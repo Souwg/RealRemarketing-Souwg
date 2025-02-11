@@ -1,0 +1,77 @@
+/* Estilos generales */
+.converter-container {
+  padding: 20px;
+  max-width: 400px;
+  margin: 0 auto;
+  text-align: center;
+  background-color: #f5f5f5;
+  border-radius: 15px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  font-family: "Arial", sans-serif;
+}
+
+/* Estilo del título */
+.converter-container h2 {
+  font-size: 24px;
+  color: #333;
+  margin-bottom: 20px;
+  font-weight: bold;
+}
+
+/* Estilo del input de archivo */
+.converter-container input[type="file"] {
+  display: none;
+}
+
+.converter-container label {
+  display: inline-block;
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: white;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.converter-container label:hover {
+  background-color: #0056b3;
+}
+
+/* Estilo de los botones */
+.converter-container button {
+  display: block;
+  width: 100%;
+  padding: 10px;
+  margin-top: 10px;
+  background-color: #28a745;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.converter-container button:hover {
+  background-color: #218838;
+}
+
+/* Estilo del botón de descarga */
+.converter-container button.download-btn {
+  background-color: #17a2b8;
+}
+
+.converter-container button.download-btn:hover {
+  background-color: #138496;
+}
+
+/* Efecto de sombra al pasar el ratón sobre los botones */
+.converter-container button:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Estilo para mostrar el nombre del archivo */
+.file-name {
+  margin-top: 10px;
+  font-size: 14px;
+  color: #555;
+}

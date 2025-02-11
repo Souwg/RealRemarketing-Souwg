@@ -1,12 +1,18 @@
 import React, { useContext, useState } from "react";
 import { Context } from "../store/appContext";
+import "../../styles/convert.css";
 
 export const ExcelToCSVConverter = () => {
   const { store, actions } = useContext(Context);
   const [file, setFile] = useState(null);
+  const [fileName, setFileName] = useState("");
 
   const handleFileChange = (event) => {
-    setFile(event.target.files[0]);
+    const selectedFile = event.target.files[0];
+    if (selectedFile) {
+      setFile(selectedFile);
+      setFileName(selectedFile.name); // Guardar el nombre del archivo
+    }
   };
 
   const handleConvert = async () => {
@@ -26,16 +32,28 @@ export const ExcelToCSVConverter = () => {
       document.body.appendChild(link);
       link.click();
       link.remove();
+
+      // Reiniciar el estado después de descargar
+      setFile(null);
+      setFileName("");
+      actions.clearUploadedFile(); // Si tienes una acción para limpiar el archivo subido
     }
   };
 
   return (
-    <div style={{ padding: "20px" }}>
+    <div className="converter-container">
       <h2>Excel to CSV Converter</h2>
-      <input type="file" accept=".xls,.xlsx" onChange={handleFileChange} />
+      <label htmlFor="file-input">Choose File</label>
+      <input
+        id="file-input"
+        type="file"
+        accept=".xls,.xlsx"
+        onChange={handleFileChange}
+      />
+      {fileName && <p className="file-name">Selected file: {fileName}</p>}
       <button onClick={handleConvert}>Convert to CSV</button>
       {store.uploadedFile && (
-        <button onClick={handleDownload} style={{ marginTop: "10px" }}>
+        <button className="download-btn" onClick={handleDownload}>
           Download CSV
         </button>
       )}

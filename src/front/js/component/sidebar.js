@@ -29,10 +29,11 @@ const Sidebar = () => {
         <ul className="nav__list">
           {[
             { to: "/", icon: "home-outline" },
-            { to: "/login", icon: "person-outline" },
+            /* { to: "/login", icon: "person-outline" },*/
+            { to: "/demo3", icon: "business-outline" },
             { to: "/editproperties", icon: "create-outline" },
-            { to: "/demo3", icon: "extension-puzzle-outline" },
-            { to: "/demo2", icon: "pizza-outline" },
+            { to: "/demo2", icon: "search-outline" },
+            { to: "/convertcsv", icon: "reader-outline" },
           ].map((item, index) => (
             <li key={index} className="nav__item">
               <Link to={item.to} className="nav_link">
