@@ -53,7 +53,7 @@
   list-style-type: none;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: flex-start;
 }
 .nav_link {
   text-decoration: none;
@@ -61,6 +61,6 @@
 .nav_link-text {
   margin-left: 2rem;
   color: #eee;
-  font-size: 60px;
+  font-size: 40px;
   font-weight: 900;
 }

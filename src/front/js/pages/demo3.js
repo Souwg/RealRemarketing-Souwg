@@ -111,20 +111,63 @@ export const DemoThree = () => {
     setFile(selectedFile);
   };
 
+  const isValidAddress = (value) => {
+    // Expresión regular mejorada para detectar direcciones complejas
+    const addressRegex = /^\d+\s+[a-zA-Z0-9\s,.-]+/;
+    return addressRegex.test(value);
+  };
+
+  const fetchParcelData = async (
+    parcelNumber,
+    address,
+    latitude,
+    longitude
+  ) => {
+    // 1. Buscar por número de parcela
+    if (parcelNumber) {
+      const parcelByNumber = await fetchParcelByNumber(parcelNumber);
+      if (parcelByNumber) return parcelByNumber;
+    }
+
+    // 2. Buscar por dirección
+    if (address) {
+      const parcelByAddress = await fetchParcelByAddress(address);
+      if (parcelByAddress) return parcelByAddress;
+    }
+
+    // 3. Buscar por latitud y longitud
+    if (latitude && longitude) {
+      const parcelByLatLon = await fetchParcelByLatLon(latitude, longitude);
+      if (parcelByLatLon) return parcelByLatLon;
+    }
+
+    // Si no se encuentra nada, retornar null
+    return null;
+  };
+
   const handleFileUpload = async (event) => {
     event.preventDefault();
     if (!file) return Swal.fire("Please select a file.", "", "warning");
 
     setLoading(true);
     try {
+      // Parsear el archivo CSV
       const rows = await parseFileContent(file);
       validateFileContent(rows);
+      console.log("All Rows:", rows);
 
+      // Obtener los encabezados del archivo
       const headers = rows[0].map((header) =>
         header ? header.trim().toLowerCase() : ""
       );
       console.log("File Headers:", headers);
 
+      // Detectar automáticamente la columna de dirección
+      const addressColumnIndex = headers.findIndex((header) =>
+        header.includes("address")
+      );
+
+      // Procesar cada fila (omitir la primera fila de encabezados)
       const dataRows = rows.slice(1);
 
       const parcels = await Promise.all(
@@ -134,22 +177,30 @@ export const DemoThree = () => {
           let latitude = null;
           let longitude = null;
 
+          // Recorrer cada celda de la fila
           row.forEach((cell, columnIndex) => {
             const value = cell?.trim();
-            console.log(`Row ${rowIndex + 1}, Column ${columnIndex}: ${value}`);
             if (!value) return;
 
-            // Aceptar cualquier tipo de texto para el número de parcela
+            // Buscar número de parcela (sin restricciones)
             if (!parcelNumber) {
-              parcelNumber = value; // No restricciones, cualquier texto es válido
+              parcelNumber = value; // Aceptar cualquier valor no vacío como número de parcela
             }
 
-            // Aceptar cualquier dirección que esté en el encabezado address
-            if (headers[columnIndex]?.includes("address") && !address) {
-              address = value; // No restricciones, cualquier texto es válido
+            // Buscar dirección en la columna de dirección (si existe)
+            if (
+              addressColumnIndex !== -1 &&
+              columnIndex === addressColumnIndex
+            ) {
+              address = value;
             }
 
-            // Aceptar cualquier valor numérico o flotante para latitud y longitud
+            // Buscar dirección en cualquier celda (si no se encontró en la columna de dirección)
+            if (!address && isValidAddress(value)) {
+              address = value;
+            }
+
+            // Buscar latitud y longitud (valores numéricos dentro de rangos válidos)
             if (!latitude && !isNaN(value) && value >= -90 && value <= 90) {
               latitude = parseFloat(value);
             } else if (
@@ -169,28 +220,27 @@ export const DemoThree = () => {
             longitude,
           });
 
-          // Intentar buscar datos con cualquier dato disponible
-          if (parcelNumber) {
-            const parcel = await fetchParcelByNumber(parcelNumber);
-            if (parcel) return parcel;
-          }
-          if (latitude && longitude) {
-            const parcel = await fetchParcelByLatLon(latitude, longitude);
-            if (parcel) return parcel;
-          }
-          if (address) {
-            const parcel = await fetchParcelByAddress(address);
-            if (parcel) return parcel;
+          // Buscar la parcela usando la función fetchParcelData
+          const parcel = await fetchParcelData(
+            parcelNumber,
+            address,
+            latitude,
+            longitude
+          );
+
+          if (!parcel) {
+            console.warn(`No valid parcel data found for row ${rowIndex + 1}`);
           }
 
-          console.warn(`No valid parcel data found for row ${rowIndex + 1}`);
-          return null;
+          return parcel;
         })
       );
 
+      // Filtrar parcelas válidas (eliminar nulls)
       const validParcels = parcels.filter(Boolean);
       console.log("Valid Parcels:", validParcels);
 
+      // Mostrar mensaje si no se encontraron parcelas válidas
       if (validParcels.length === 0) {
         setLoading(false);
         return Swal.fire(
@@ -200,6 +250,7 @@ export const DemoThree = () => {
         );
       }
 
+      // Actualizar el estado con las parcelas válidas
       setParcelDataList(validParcels);
       await actions.uploadParcels(validParcels);
       Swal.fire(
