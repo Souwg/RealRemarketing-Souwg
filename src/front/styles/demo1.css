@@ -1,0 +1,260 @@
+/*General styles */
+.upload-section {
+  margin: 20px auto;
+  max-width: 600px;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.upload-form {
+  margin-top: 5%;
+  background: #fff6f2;
+  padding: 20px;
+  text-align: center;
+  width: auto;
+}
+
+.file-input-container {
+  margin-bottom: 15px;
+  position: relative;
+  border: 2px dashed #d3d3d3;
+  border-radius: 8px;
+  padding: 20px;
+  transition: border-color 0.3s ease;
+}
+
+.file-input-container:hover {
+  border-color: #007bff;
+}
+
+.file-input {
+  position: absolute;
+  opacity: 0;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+}
+
+.file-label {
+  font-size: 14px;
+  color: #6c757d;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.upload-button {
+  background-color: #007bff;
+  color: #ffffff;
+  border: none;
+  border-radius: 24px;
+  padding: 12px 24px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  width: auto;
+  min-width: 180px;
+  max-width: 250px;
+  display: block;
+  margin: 20px auto 0 auto;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.upload-button:hover {
+  background-color: #0056b3;
+  box-shadow: 0px 6px 10px rgba(0, 0, 0, 0.2);
+  transform: translateY(-2px);
+}
+
+.upload-button:active {
+  background-color: #004494;
+  box-shadow: 0px 3px 5px rgba(0, 0, 0, 0.15);
+  transform: translateY(1px);
+}
+
+.upload-button:disabled {
+  background-color: #cccccc;
+  color: #666666;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* Contenedor de botones */
+.button-container {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  max-width: 600px;
+  margin: 20px auto;
+}
+
+/* Layout adjustments for different screen sizes */
+@media screen and (max-width: 768px) {
+  .upload-section {
+    margin: 10px auto;
+    padding: 15px;
+  }
+
+  .upload-form {
+    padding: 15px;
+  }
+
+  .file-label {
+    font-size: 12px;
+  }
+
+  .upload-button {
+    font-size: 12px;
+    padding: 8px;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .upload-section {
+    margin: 5px auto;
+    padding: 10px;
+  }
+
+  .file-input-container {
+    padding: 10px;
+  }
+
+  .file-label {
+    font-size: 10px;
+  }
+
+  .upload-button {
+    font-size: 10px;
+    padding: 6px;
+  }
+}
+
+/* Menu container and button styles */
+.menu-container {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  margin-left: 10px;
+}
+
+.menu-button {
+  background: #f1f1f1;
+  border: none;
+  border-radius: 50%;
+  font-size: 18px;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.menu-button:hover {
+  background-color: #e0e0e0;
+  transform: scale(1.1);
+}
+*/ .menu-dropdown {
+  position: absolute;
+  top: 42px; /* Más cerca del botón */
+  right: -5px; /* Alineado mejor con el botón */
+  background: #ffffff;
+  border: 1px solid #d3d3d3;
+  border-radius: 6px; /* Bordes suaves */
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  padding: 10px 0;
+  width: 180px;
+  pointer-events: auto;
+  transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
+}
+
+.menu-container:hover .menu-dropdown {
+  display: block;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.menu-item {
+  background: none;
+  border: none;
+  padding: 10px 16px;
+  font-size: 14px;
+  color: #e74c3c; /* Rojo moderno */
+  text-align: left;
+  width: 100%;
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.menu-item:hover {
+  background-color: #fceae9;
+  color: #c0392b; /* Rojo más oscuro al hover */
+}
+
+.button-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* File table container */
+.file-table-container {
+  margin-top: 20px;
+  padding: 10px;
+  background-color: #f9f9f9;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.file-table-container h2 {
+  font-size: 24px;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 15px;
+  text-align: center;
+}
+
+.file-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+.file-table th,
+.file-table td {
+  border: 1px solid #ddd;
+  padding: 10px;
+  text-align: left;
+}
+
+.file-table th {
+  background-color: #f4f4f4;
+  font-weight: bold;
+  color: #555;
+}
+
+.file-table tbody tr:nth-child(even) {
+  background-color: #f8f8f8;
+}
+
+.file-table tbody tr:hover {
+  background-color: #e6f7ff;
+}
+
+.file-table td {
+  color: #333;
+  font-size: 14px;
+}
+
+/* Estilos para manejar la tabla vacía */
+.file-table-container p {
+  color: #999;
+  text-align: center;
+  font-style: italic;
+}

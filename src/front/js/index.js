@@ -1,12 +1,20 @@
-//import react into the bundle
+// index.js
 import React from "react";
 import ReactDOM from "react-dom";
+import Layout from "./layout"; // tu componente principal
 
-//include your index.scss file into the bundle
-import "../styles/index.css";
+const rootElement = document.querySelector("#app");
 
-//import your own components
-import Layout from "./layout";
+const render = (Component) => {
+  ReactDOM.render(<Component />, rootElement);
+};
 
-//render your react application
-ReactDOM.render(<Layout />, document.querySelector("#app"));
+render(Layout);
+
+// HMR setup
+if (module.hot) {
+  module.hot.accept("./layout", () => {
+    const NextLayout = require("./layout").default;
+    render(NextLayout);
+  });
+}
