@@ -23,13 +23,24 @@ static_file_dir = os.path.join(os.path.dirname(
     os.path.realpath(__file__)), '../public/')
 app.url_map.strict_slashes = False
 
-# Configuración de la base de datos
+# Obtener la URL de la base de datos desde las variables de entorno
 db_url = os.getenv("DATABASE_URL")
-if db_url is not None:
-    app.config['SQLALCHEMY_DATABASE_URI'] = db_url.replace(
-        "postgres://", "postgresql://")
-else:
-    app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:////tmp/test.db"
+
+# Verificar si está en un contenedor Docker
+if not db_url:
+    if os.getenv("IN_DOCKER") == "true":
+        db_url = "postgresql://gitpod:postgres@db:5432/example"  # 🚀 Cuando corre en Docker
+    else:
+        db_url = "postgresql://gitpod:postgres@localhost:5432/example"  # 🖥️ Cuando corre en DevContainer
+
+# Reemplazar "postgres://" con "postgresql://" si es necesario
+db_url = db_url.replace("postgres://", "postgresql://")
+
+# Imprimir la conexión a la base de datos para depuración
+print(f"🔗 Conectando a la base de datos en: {db_url}")
+
+app.config['SQLALCHEMY_DATABASE_URI'] = db_url
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 MIGRATE = Migrate(app, db, compare_type=True)
