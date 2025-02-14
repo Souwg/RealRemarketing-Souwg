@@ -1,7 +1,7 @@
 """
 This module takes care of starting the API Server, Loading the DB and Adding the endpoints
 """
-from flask import Flask, request, jsonify, url_for, Blueprint
+from flask import Flask, request, jsonify, url_for, Blueprint, send_file
 from sqlalchemy.dialects.postgresql import insert
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt,get_jwt_identity, current_user
 from flask_bcrypt import Bcrypt
@@ -12,7 +12,7 @@ from .models import Files, db
 from .models import Property, db
 from flask_cors import CORS
 import jwt
-import os
+import io
 import datetime
 from src.app import db
 from flask import jsonify, request
@@ -395,6 +395,24 @@ def add_property_field(parcel_number):
         db.session.rollback()
         print(f"Error adding new field: {e}")
         return jsonify({"error": str(e)}), 500
+    
+    
+    #Ruta para transformar un archivo excel a uno csv
+@api.route('/convert', methods=['POST'])
+def convert_excel_to_csv():
+    file = request.files['file']
+    df = pd.read_excel(file)
+
+    csv_buffer = io.StringIO()
+    df.to_csv(csv_buffer, index=False)
+    csv_buffer.seek(0)
+
+    return send_file(
+    io.BytesIO(csv_buffer.getvalue().encode('utf-8')),
+    mimetype='text/csv',
+    as_attachment=True,
+    download_name='converted_file.csv'
+    )
 #@api.route('/excel', methods=['GET'])
 #def excel_data():
 

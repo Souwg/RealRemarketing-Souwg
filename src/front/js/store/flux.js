@@ -63,8 +63,8 @@ const getState = ({ getStore, getActions, setStore }) => {
         setStore({ token: null, user: null });
       },
 
-      //action upload files
-      uploadFile: async (file) => {
+      //action upload files (demo1)
+      /*uploadFile: async (file) => {
         const formData = new FormData();
         formData.append("file", file);
 
@@ -133,7 +133,7 @@ const getState = ({ getStore, getActions, setStore }) => {
           );
           return [];
         }
-      },
+      },*/
 
       uploadParcels: async (parcels) => {
         try {
@@ -156,6 +156,33 @@ const getState = ({ getStore, getActions, setStore }) => {
           return data;
         } catch (error) {
           console.error("Error uploading parcels:", error);
+          throw error;
+        }
+      },
+
+      uploadAndConvertExcel: async (file) => {
+        const formData = new FormData();
+        formData.append("file", file);
+
+        try {
+          const response = await fetch(backendURL + "convert", {
+            method: "POST",
+            body: formData,
+          });
+
+          if (!response.ok) {
+            throw new Error("Error converting the file");
+          }
+
+          const blob = await response.blob();
+
+          // Guardamos el archivo convertido en el store para su posterior descarga
+          setStore({ uploadedFile: blob });
+
+          console.log("File converted successfully!");
+          return blob;
+        } catch (error) {
+          console.error("Error converting file:", error);
           throw error;
         }
       },
